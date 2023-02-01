@@ -12,7 +12,12 @@ public class PlanetGenerator : MonoBehaviour
     public Planet planet;
     [Range(0,8)]
     public int gridSize;
+
+    [Header("Actions (check to execute)")]
+    [Tooltip("Regenerate mesh")]
     public bool meshDirty;
+    public bool subdivideGrid;
+    public bool resetPlanet;
 
     // Start is called before the first frame update
     void Start()
@@ -27,13 +32,34 @@ public class PlanetGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (subdivideGrid) {
+            gridSize = planet.grid.size + 1;
+            subdivideGrid = false;
+        }
         if (gridSize != planet.grid.size) {
             Debug.Log($"Setting planet grid size from {planet.grid.size} to {gridSize}");
             planet.set_grid_size(gridSize);
             meshDirty = true;
         }
+        if (resetPlanet) {
+            planet.Clear();
+            gridSize = planet.grid.size;
+            meshDirty = true;
+            resetPlanet = false;
+        }
         if (meshDirty) {
-            planet.grid.GenerateMesh(GetComponent<MeshFilter>().mesh);
+            var meshFilter = GetComponent<MeshFilter>();
+            Mesh mesh;
+            if (Application.isPlaying) {
+                mesh = meshFilter.mesh;
+            } else {
+                mesh = meshFilter.sharedMesh;
+                if (!mesh) {
+                    mesh = meshFilter.sharedMesh = new Mesh();
+                    mesh.name = gameObject.name;
+                }
+            }
+            planet.grid.GenerateMesh(mesh);
             meshDirty = false;
         }
     }

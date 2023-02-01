@@ -42,24 +42,44 @@ namespace Earthgen.planet.grid
 			if (useMesh) mesh = useMesh;
 			if (!mesh) mesh = new Mesh();
 			mesh.Clear();
-			var vertices = new Vector3[corners.Count + tiles.Count];
-			for (int i = 0; i < corners.Count; i++) {
-				vertices[i] = corners[i].v;
-			}
+			mesh.subMeshCount = 1;
+			var vertices = new List<Vector3>(); //[corners.Count + tiles.Count];
+			var normals = new List<Vector3>();
+			var uvs = new List<Vector2>();
 			var triangles = new List<int>();
+			int tilesPerSide = Mathf.CeilToInt(Mathf.Sqrt(tiles.Count));
+			int AddVertex(Vector3 pos, Vector3 normal, Vector2 uv, bool addToTriangle = true)
+			{
+				int idx = vertices.Count;
+				if (addToTriangle)
+					triangles.Add(idx);
+				vertices.Add(pos);
+				normals.Add(normal);
+				uvs.Add(uv);
+				return idx;
+			}
 			for (int i = 0; i < tiles.Count; i++) {
+				int x = i % tilesPerSide;
+				int y = i / tilesPerSide;
+				Vector2 uvCenter = new((x + 0.5f) / tilesPerSide, (y + 0.5f) / tilesPerSide);
 				Tile t = tiles[i];
 				Vector3 v = Vector3.zero;
+				float angle = 0;
+				float aDelta = Mathf.PI * 2 / t.edge_count;
+				int centerVertex = AddVertex(Vector3.zero, t.v, uvCenter, false);
 				for (int j = 0; j < t.edge_count; j++) {
 					v += t.corners[j].v;
-					triangles.Add(t.nth_corner(j).id); // this corner
-					triangles.Add(t.nth_corner(j + 1).id); // next corner
-					triangles.Add(corners.Count + i); // center
+					float nextAngle = angle + aDelta;
+					AddVertex(t.nth_corner(j).v, t.v, uvCenter + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) / tilesPerSide / 2); // this corner
+					AddVertex(t.nth_corner(j + 1).v, t.v, uvCenter + new Vector2(Mathf.Cos(nextAngle), Mathf.Sin(nextAngle)) / tilesPerSide / 2); // next corner
+					triangles.Add(centerVertex); // center
+					angle = nextAngle;
 				}
-				vertices[corners.Count + i] = v / t.edge_count;
+				vertices[centerVertex] = v / t.edge_count;
 			}
 			mesh.SetVertices(vertices);
-			mesh.subMeshCount = 1;
+			mesh.SetNormals(normals);
+			mesh.SetUVs(0, uvs);
 			mesh.SetTriangles(triangles, 0);
         }
 
