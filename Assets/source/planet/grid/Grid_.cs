@@ -37,6 +37,10 @@ namespace Earthgen.planet.grid
 		public static int edge_count(int size) => 30 * (int)Math.Pow(3, size);
 
         [UnityEngine.ContextMenu("Generate Mesh")]
+		public void GenerateMeshCommand()
+		{
+			GenerateMesh();
+		}
         public void GenerateMesh(Mesh useMesh = null)
         {
 			if (useMesh) mesh = useMesh;
