@@ -12,9 +12,11 @@ namespace Earthgen.planet
     {
         public void OnEnable()
         {
-            grid = Grid.size_n_grid(0);
-            terrain = CreateInstance<Terrain>();
-            //climate = CreateInstance<Climate>();
+            if (!grid) {
+                grid = Grid.size_n_grid(0);
+                terrain = CreateInstance<Terrain>();
+                //climate = CreateInstance<Climate>();
+            }
         }
 
         public Grid grid;

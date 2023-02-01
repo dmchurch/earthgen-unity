@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
+using System.Linq;
 using UnityEngine;
 
 namespace Earthgen.planet.grid
@@ -30,12 +30,52 @@ namespace Earthgen.planet.grid
 		public List<Tile> tiles = new();
 		public List<Corner> corners = new();
 		public List<Edge> edges = new();
+		public Mesh mesh;
 
 		public static int tile_count(int size) => 10 * (int)Math.Pow(3, size) + 2;
 		public static int corner_count(int size) => 20 * (int)Math.Pow(3, size);
 		public static int edge_count(int size) => 30 * (int)Math.Pow(3, size);
-	};
 
+        [UnityEngine.ContextMenu("Generate Mesh")]
+        public void GenerateMesh(Mesh useMesh = null)
+        {
+			if (useMesh) mesh = useMesh;
+			if (!mesh) mesh = new Mesh();
+			mesh.Clear();
+			var vertices = new Vector3[corners.Count + tiles.Count];
+			for (int i = 0; i < corners.Count; i++) {
+				vertices[i] = corners[i].v;
+			}
+			var triangles = new List<int>();
+			for (int i = 0; i < tiles.Count; i++) {
+				Tile t = tiles[i];
+				Vector3 v = Vector3.zero;
+				for (int j = 0; j < t.edge_count; j++) {
+					v += t.corners[j].v;
+					triangles.Add(t.nth_corner(j).id); // this corner
+					triangles.Add(t.nth_corner(j + 1).id); // next corner
+					triangles.Add(corners.Count + i); // center
+				}
+				vertices[corners.Count + i] = v / t.edge_count;
+			}
+			mesh.SetVertices(vertices);
+			mesh.subMeshCount = 1;
+			mesh.SetTriangles(triangles, 0);
+        }
+
+		[UnityEngine.ContextMenu("Subdivide Grid")]
+		public void SubdivideGrid()
+		{
+			Grid grid = _subdivided_grid(this);
+			tiles = grid.tiles;
+			corners = grid.corners;
+			edges = grid.edges;
+			size = grid.size;
+			if (mesh) DestroyImmediate(mesh);
+			mesh = null;
+			DestroyImmediate(grid);
+		}
+	}
 	public static class PlanetExtensions
 	{
 		public static void set_grid_size(this Planet p, int size)
