@@ -1,86 +1,119 @@
-#include "tile.h"
-#include "corner.h"
-#include "../../math/math_common.h"
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
-Tile::Tile (int i, int e) :
-	id (i), edge_count (e) {
-	tiles.resize(edge_count, nullptr);
-	corners.resize(edge_count, nullptr);
-	edges.resize(edge_count, nullptr);
-}
+namespace Earthgen.planet.grid
+{
+    public class Tile : ScriptableObject
+	{
+		public static Tile New(int id, int edge_count) => CreateInstance<Tile>().Init(id, edge_count);
+		public Tile Init(int i, int e)
+		{
+			id = i;
+			edge_count = e;
+			tiles.Resize(edge_count, null);
+			corners.Resize(edge_count, null);
+			edges.Resize(edge_count, null);
+			return this;
+		}
 
-int position (const Tile& t, const Tile* n) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.tiles[i] == n)
-			return i;
-	return -1;
-}
+		public int position(Tile n)
+		{
+			for (int i=0; i<edge_count; i++)
+				if (tiles[i] == n)
+					return i;
+			return -1;
+		}
+        public int position(Corner c)
+		{
+			for (int i=0; i<edge_count; i++)
+				if (corners[i] == c)
+					return i;
+			return -1;
+		}
+		public int position(Edge e)
+		{
+			for (int i=0; i<edge_count; i++)
+				if (edges[i] == e)
+					return i;
+			return -1;
+		}
 
-int position (const Tile& t, const Corner* c) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.corners[i] == c)
-			return i;
-	return -1;
-}
+		public int id;
+		public int edge_count;
+		public Vector3 v;
+		public List<Tile> tiles = new();
+		public List<Corner> corners = new();
+		public List<Edge> edges = new();
 
-int position (const Tile& t, const Edge* e) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.edges[i] == e)
-			return i;
-	return -1;
-}
+		public Tile nth_tile(int n)
+		{
+			int k = n < 0 ?
+				n % edge_count + edge_count :
+				n % edge_count;
+			return tiles[k];
+		}
 
-int id (const Tile& t) {return t.id;}
-int edge_count (const Tile& t) {return t.edge_count;}
-const Vector3& vector (const Tile& t) {return t.v;}
-const std::vector<const Tile*>& tiles (const Tile& t) {return t.tiles;}
-const std::vector<const Corner*>& corners (const Tile& t) {return t.corners;}
-const std::vector<const Edge*>& edges (const Tile& t) {return t.edges;}
+		public Corner nth_corner(int n)
+		{
+			int k = n < 0 ?
+				n % edge_count + edge_count :
+				n % edge_count;
+			return corners[k];
+		}
 
-const Tile* nth_tile (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.tiles[k];
-}
+		public Edge nth_edge(int n)
+		{
+			int k = n < 0 ?
+				n % edge_count + edge_count :
+				n % edge_count;
+			return edges[k];
+		}
 
-const Corner* nth_corner (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.corners[k];
-}
+        public Quaternion reference_rotation(Quaternion d)
+		{
+			Vector3 v = d * this.v;
+			Quaternion h = Quaternion.identity;
+			if (v.x != 0 || v.y != 0) {
+				if (v.y != 0) h = Quaternion.FromToRotation(new Vector3(v.x, v.y, 0).normalized, new Vector3(-1,0,0));
+				else if (v.x > 0) h = Quaternion.AngleAxis(Mathf.PI, new Vector3(0,0,1));
+			}
+			Quaternion q = Quaternion.identity;
+			if (v.x == 0 && v.y == 0) {
+				if (v.z < 0) q = Quaternion.AngleAxis(Mathf.PI, new Vector3(1,0,0));
+			}
+			else {
+				q = Quaternion.FromToRotation(h*v, new Vector3(0,0,1));
+			}
+			return q*h*d;
+		}
 
-const Edge* nth_edge (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.edges[k];
-}
-
-Quaternion reference_rotation (const Tile* t, Quaternion d) {
-	Vector3 v = d * vector(t);
-	Quaternion h = Quaternion();
-	if (v.x != 0 || v.y != 0) {
-		if (v.y != 0) h = Quaternion(normal(Vector3(v.x, v.y, 0)), Vector3(-1,0,0));
-		else if (v.x > 0) h = Quaternion(Vector3(0,0,1), pi);
+        public List<Vector2> polygon(Quaternion d)
+		{
+			List<Vector2> p = new();
+			Quaternion q = reference_rotation(d);
+			for (int i=0; i<edge_count; i++) {
+				Vector3 c = q * nth_corner(i).v;
+				p.Add(new Vector2(c.x, c.y));
+			}
+			return p;
+		}
 	}
-	Quaternion q = Quaternion();
-	if (v.x == 0 && v.y == 0) {
-		if (v.z < 0) q = Quaternion(Vector3(1,0,0), pi);
-	}
-	else {
-		q = Quaternion(h*v, Vector3(0,0,1));
-	}
-	return q*h*d;
-}
 
-std::vector<Vector2> polygon (const Tile* t, Quaternion d) {
-	std::vector<Vector2> p;
-	Quaternion q = reference_rotation(t, d);
-	for (int i=0; i<edge_count(t); i++) {
-		Vector3 c = q * vector(nth_corner(t, i));
-		p.push_back(Vector2(c.x, c.y));
+
+	public static class ListExtensions
+	{
+		public static void Resize<T>(this List<T> list, int sz, T c = default)
+		{
+			int cur = list.Count;
+			if(sz < cur)
+				list.RemoveRange(sz, cur - sz);
+			else if(sz > cur)
+			{
+				if(sz > list.Capacity)//this bit is purely an optimisation, to avoid multiple automatic capacity changes.
+				  list.Capacity = sz;
+				list.AddRange(Enumerable.Repeat(c, sz - cur));
+			}
+		}
 	}
-	return p;
 }
