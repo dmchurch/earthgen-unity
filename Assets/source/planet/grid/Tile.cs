@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace Earthgen.planet.grid
 {
-    public class Tile : ScriptableObject
+    public class Tile : IComparable<Tile>
 	{
-		public static Tile New(int id, int edge_count) => CreateInstance<Tile>().Init(id, edge_count);
+		public static Tile New(int id, int edge_count) => new Tile().Init(id, edge_count);
 		public Tile Init(int i, int e)
 		{
 			id = i;
 			edge_count = e;
-			tiles.Resize(edge_count, null);
-			corners.Resize(edge_count, null);
-			edges.Resize(edge_count, null);
+			tiles = tiles.Resize(edge_count, null);
+			corners = corners.Resize(edge_count, null);
+			edges = edges.Resize(edge_count, null);
 			return this;
 		}
 
@@ -42,9 +43,9 @@ namespace Earthgen.planet.grid
 		public int id;
 		public int edge_count;
 		public Vector3 v;
-		public List<Tile> tiles = new();
-		public List<Corner> corners = new();
-		public List<Edge> edges = new();
+		public Tile[] tiles = new Tile[0];
+		public Corner[] corners = new Corner[0];
+		public Edge[] edges = new Edge[0];
 
 		public Tile nth_tile(int n)
 		{
@@ -98,22 +99,7 @@ namespace Earthgen.planet.grid
 			}
 			return p;
 		}
-	}
 
-
-	public static class ListExtensions
-	{
-		public static void Resize<T>(this List<T> list, int sz, T c = default)
-		{
-			int cur = list.Count;
-			if(sz < cur)
-				list.RemoveRange(sz, cur - sz);
-			else if(sz > cur)
-			{
-				if(sz > list.Capacity)//this bit is purely an optimisation, to avoid multiple automatic capacity changes.
-				  list.Capacity = sz;
-				list.AddRange(Enumerable.Repeat(c, sz - cur));
-			}
-		}
+		public int CompareTo(Tile other) => id.CompareTo(other.id);
 	}
 }

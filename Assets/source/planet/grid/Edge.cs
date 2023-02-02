@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Earthgen.planet.grid
 {
-    public class Edge : ScriptableObject
+    public class Edge : IComparable<Edge>
 	{
-		public static Edge New(int id) => CreateInstance<Edge>().Init(id);
+		public static Edge New(int id) => new Edge().Init(id);
 		public Edge Init(int i)
 		{
 			id = i;
@@ -57,5 +58,7 @@ namespace Earthgen.planet.grid
 		{
 			return corners[i];
 		}
+
+		public int CompareTo(Edge other) => id.CompareTo(other.id);
 	}
 }

@@ -1,91 +1,96 @@
-#include "terrain.h"
-#include "../planet.h"
-#include "../../math/quaternion.h"
-#include <cmath>
+﻿using Earthgen.planet.grid;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
-void clear_terrain (Planet& p) {
-	std::deque<Terrain_tile>().swap(p.terrain->tiles);
-	std::deque<Terrain_corner>().swap(p.terrain->corners);
-	std::deque<Terrain_edge>().swap(p.terrain->edges);
+namespace Earthgen.planet.terrain
+{
+    public partial class Terrain : ScriptableObject
+    {
+        public Terrain_variables var;
+        public Terrain_tile[] tiles;
+        public Terrain_corner[] corners;
+        public Terrain_edge[] edges;
+
+        public float MaxElevation => (from t in tiles select t.elevation).Concat(from c in corners select c.elevation).Max();
+        public float MinElevation => (from t in tiles select t.elevation).Concat(from c in corners select c.elevation).Min();
+
+        public static double latitude(Vector3 v) => Mathf.Asin(v.y);
+        public static double longitude(Vector3 v) => v.x == 0 && v.z == 0 ? 0 : Mathf.Atan2(v.z, v.x);
+
+        public static Vector3 default_axis() => Vector3.up;
+
+        public Terrain_tile nth_tile(int n) => tiles[n];
+        public Terrain_corner nth_corner(int n) => corners[n];
+        public Terrain_edge nth_edge(int n) => edges[n];
+
+        public ref Terrain_tile m_tile(int n) => ref tiles[n];
+        public ref Terrain_corner m_corner(int n) => ref corners[n];
+        public ref Terrain_edge m_edge(int n) => ref edges[n];
+
+
+        [Flags]
+        public enum Type
+        {
+            land = 1,
+            water = 2,
+            coast = 4,
+        }
+    }
+
+    public static partial class PlanetExtensions
+    {
+        public static void clear_terrain(this Planet p)
+        {
+            p.terrain.tiles = new Terrain_tile[0];
+            p.terrain.corners = new Terrain_corner[0];
+            p.terrain.edges = new Terrain_edge[0];
+        }
+        public static void init_terrain(this Planet p)
+        {
+            p.clear_terrain();
+            p.terrain.tiles = p.terrain.tiles.Resize(p.tile_count(), Terrain_tile.Default);
+            p.terrain.corners = p.terrain.corners.Resize(p.corner_count(), Terrain_corner.Default);
+            p.terrain.edges = p.terrain.edges.Resize(p.edge_count(), Terrain_edge.Default);
+        }
+
+        public static double latitude (this Planet p, Vector3 v) => Mathf.PI / 2 - Vector3.Angle(p.axis(), v);
+        public static double longitude (this Planet p, Vector3 v) => Terrain.longitude(p.rotation_to_default() * v);
+
+        // angle from corner 0 to north
+        public static double north(this Planet p, Tile t)
+        {
+            Vector3 v = t.reference_rotation(p.rotation_to_default()) * t.nth_tile(0).v;
+            return Mathf.PI - Mathf.Atan2(v.y, v.x);
+        }
+
+        public static double area (this Planet p, Tile t)
+        {
+            double a = 0.0;
+	        for (int k=0; k<t.edge_count; k++) {
+		        float angle = Mathf.Acos(Vector3.Dot((t.v - t.nth_corner(k).v).normalized, (t.v - t.nth_corner(k+1).v).normalized));
+		        a += 0.5 * Mathf.Sin(angle) * Vector3.Distance(t.v, t.nth_corner(k).v) * Vector3.Distance(t.v, t.nth_corner(k+1).v);
+		        /*
+		         *	double base = length(corner(t,k)->v - corner(t,k+1)->v);
+		         *	double height = length(((corner(t,k)->v + corner(t,k+1)->v) * 0.5) - t->v);
+		         *	a += 0.5 * base * height;
+		         */
+	        }
+	        return a * Math.Pow(p.radius(), 2.0);
+        }
+        public static double length (this Planet p, Edge e) => Vector3.Distance(e.nth_corner(0).v, e.nth_corner(1).v) * p.radius();
+
+        private static double angular_velocity(this Planet p)
+        {
+	        /* currently locked at 24 hours */
+	        return 2.0 * Math.PI / (24 * 60 * 60);
+        }
+
+        public static double coriolis_coefficient (this Planet p, double latitude) => 2.0 * p.angular_velocity() * Math.Sin(latitude);
+
+        public static Quaternion rotation (this Planet p) => Quaternion.FromToRotation(Terrain.default_axis(), p.axis());
+        // rotation to bring planet axis into default position
+        public static Quaternion rotation_to_default (this Planet p) => Quaternion.FromToRotation(p.axis(), Terrain.default_axis());
+    }
 }
-
-void init_terrain (Planet& p) {
-	clear_terrain(p);
-	p.terrain->tiles.resize(tile_count(p));
-	p.terrain->corners.resize(corner_count(p));
-	p.terrain->edges.resize(edge_count(p));
-}
-
-double latitude (const Vector3& v) {
-	return std::asin(v.z);
-}
-double longitude (const Vector3& v) {
-	if (v.x == 0 && v.y == 0)
-		return 0;
-	return std::atan2(v.y, v.x);
-}
-
-double latitude (const Planet& p, const Vector3& v) {
-	return pi/2 - angle(axis(p), v);
-}
-
-double longitude (const Planet& p, const Vector3& v) {
-	Vector3 u = rotation_to_default(p) * v;
-	return longitude(u);
-}
-
-double north (const Planet& p, const Tile* t) {
-	Vector3 v = reference_rotation(t, rotation_to_default(p)) * vector(nth_tile(t, 0));
-	return pi-atan2(v.y, v.x);
-}
-
-double area (const Planet& p, const Tile* t) {
-	double a = 0.0;
-	for (int k=0; k<edge_count(t); k++) {
-		double angle = acos(dot_product(normal(vector(t) - vector(nth_corner(t,k))), normal(vector(t) - vector(nth_corner(t,k+1)))));
-		a += 0.5 * sin(angle) * distance(vector(t), vector(nth_corner(t,k))) * distance(vector(t), vector(nth_corner(t,k+1)));
-		/*
-		 *	double base = length(corner(t,k)->v - corner(t,k+1)->v);
-		 *	double height = length(((corner(t,k)->v + corner(t,k+1)->v) * 0.5) - t->v);
-		 *	a += 0.5 * base * height;
-		 */
-	}
-	return a * pow(radius(p), 2.0);
-}
-
-double length (const Planet& p, const Edge* e) {
-	return distance(vector(nth_corner(e,0)), vector(nth_corner(e,1))) * radius(p);
-}
-
-double angular_velocity (const Planet&) {
-	/* currently locked at 24 hours */
-	return 2.0 * pi / (24 * 60 * 60);
-}
-
-double coriolis_coefficient (const Planet& p, double latitude) {
-	return 2.0 * angular_velocity(p) * sin(latitude);
-}
-
-Vector3 default_axis () {return Vector3(0,0,1);}
-Quaternion rotation (const Planet& p) {
-	return Quaternion(default_axis(), axis(p));
-}
-Quaternion rotation_to_default (const Planet& p) {
-	return conjugate(rotation(p));
-	return Quaternion(axis(p), default_axis());
-}
-
-const Terrain& terrain (const Planet& p) {return *p.terrain;}
-Terrain& m_terrain (Planet& p) {return *p.terrain;}
-
-const std::deque<Terrain_tile>& tiles (const Terrain& t) {return t.tiles;}
-const std::deque<Terrain_corner>& corners (const Terrain& t) {return t.corners;}
-const std::deque<Terrain_edge>& edges (const Terrain& t) {return t.edges;}
-
-const Terrain_tile& nth_tile (const Terrain& t, int n) {return t.tiles[n];}
-const Terrain_corner& nth_corner (const Terrain& t, int n) {return t.corners[n];}
-const Terrain_edge& nth_edge (const Terrain& t, int n) {return t.edges[n];}
-
-Terrain_tile& m_tile (Terrain& t, int n) {return t.tiles[n];}
-Terrain_corner& m_corner (Terrain& t, int n) {return t.corners[n];}
-Terrain_edge& m_edge (Terrain& t, int n) {return t.edges[n];}

@@ -1,9 +1,31 @@
-#include "terrain_corner.h"
+﻿using System;
+using UnityEngine;
 
-bool is_land (const Terrain_corner& c) {return c.type == c.type_land;}
-bool is_water (const Terrain_corner& c) {return c.type == c.type_water;}
-bool is_coast (const Terrain_corner& c) {return c.type == c.type_coast;}
+namespace Earthgen.planet.terrain
+{
+    [Serializable]
+    public struct Terrain_corner
+    {
+        public static Terrain_corner Default => new() {
+            type = Terrain.Type.land,
+            elevation = 0,
+            river_direction = -1,
+            distance_to_sea = -1,
+        };
+        public void Reset()
+        {
+            elevation = 0;
+            river_direction = -1;
+            distance_to_sea = -1;
+            type = Terrain.Type.land;
+        }
+        public float elevation;
+        public int river_direction;
+        public int distance_to_sea;
+        public Terrain.Type type;
 
-float elevation (const Terrain_corner& c) {return c.elevation;}
-int river_direction (const Terrain_corner& c) {return c.river_direction;}
-int distance_to_sea (const Terrain_corner& c) {return c.distance_to_sea;}
+        public bool is_land() => type == Terrain.Type.land;
+        public bool is_water() => type == Terrain.Type.water;
+        public bool is_coast() => type == Terrain.Type.coast;
+    }
+}

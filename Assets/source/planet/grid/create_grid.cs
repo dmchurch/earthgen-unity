@@ -76,8 +76,8 @@ namespace Earthgen.planet.grid
         {
             Grid grid = Grid.New(prev.size + 1);
 
-            int prev_tile_count = prev.tiles.Count;
-            int prev_corner_count = prev.corners.Count;
+            int prev_tile_count = prev.tiles.Length;
+            int prev_corner_count = prev.corners.Length;
 
             //old tiles
             for (int i = 0; i < prev_tile_count; i++) {

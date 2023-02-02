@@ -1,8 +1,22 @@
-#include "terrain_tile.h"
+﻿using System;
 
-bool is_land (const Terrain_tile& t) {return t.type & t.type_land;}
-bool is_water (const Terrain_tile& t) {return t.type & t.type_water;}
-bool has_coast (const Terrain_tile& t) {return t.type & t.type_coast;}
+namespace Earthgen.planet.terrain
+{
+    [Serializable]
+    public struct Terrain_tile
+    {
+        public static Terrain_tile Default => new()
+        {
+            type = Terrain.Type.land,
+        };
+        public float elevation;
+        public Terrain_water water;
+        public Terrain.Type type;
 
-float elevation (const Terrain_tile& t) {return t.elevation;}
-float water_depth (const Terrain_tile& t) {return t.water.depth;}
+        public bool is_land() => type.HasFlag(Terrain.Type.land);
+        public bool is_water() => type.HasFlag(Terrain.Type.water);
+        public bool has_coast() => type.HasFlag(Terrain.Type.coast);
+
+        public float water_depth() => water.depth;
+    }
+}

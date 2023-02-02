@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Earthgen.planet.grid
 {
-    public class Corner : ScriptableObject
+    public class Corner : IComparable<Corner>
 	{
-		public static Corner New(int id) => CreateInstance<Corner>().Init(id);
+		public static Corner New(int id) => new Corner().Init(id);
 		public Corner Init(int i)
 		{
 			id = i;
@@ -55,5 +56,7 @@ namespace Earthgen.planet.grid
 				i%3;
 			return edges[k];
 		}
+
+		public int CompareTo(Corner other) => id.CompareTo(other.id);
 	}
 }

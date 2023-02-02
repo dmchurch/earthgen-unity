@@ -1,5 +1,18 @@
-#include "terrain_edge.h"
+﻿using System;
 
-bool is_land (const Terrain_edge& e) {return e.type == e.type_land;}
-bool is_water (const Terrain_edge& e) {return e.type == e.type_water;}
-bool is_coast (const Terrain_edge& e) {return e.type == e.type_coast;}
+namespace Earthgen.planet.terrain
+{
+    [Serializable]
+    public struct Terrain_edge
+    {
+        public static Terrain_edge Default => new()
+        {
+            type = Terrain.Type.land,
+        };
+        public Terrain.Type type;
+
+        public bool is_land() => type == Terrain.Type.land;
+        public bool is_water() => type == Terrain.Type.water;
+        public bool is_coast() => type == Terrain.Type.coast;
+    }
+}
