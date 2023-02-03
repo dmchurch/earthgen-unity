@@ -132,8 +132,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 268536980}
-  - component: {fileID: 268536979}
-  - component: {fileID: 268536978}
   - component: {fileID: 268536977}
   m_Layer: 0
   m_Name: Planet
@@ -154,76 +152,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78a28369731021d44834c9db238cc834, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  planet: {fileID: 0}
-  gridSize: 5
-  elevationScale: 5110
-  modelElevation: 1
-  rotationAxis: {x: 0, y: 1, z: 0}
-  terrainParameters:
-    grid_size: 5
-    axis: {x: 0, y: 1, z: 0}
-    seed: 
-    iterations: 1000
-    water_ratio: 0.5329999923706055
-  regenerateAutomatically: 0
-  meshDirty: 0
-  subdivideGrid: 0
-  resetPlanet: 0
-  resetAxis: 0
-  generateTerrain: 0
-  generateClimate: 0
---- !u!33 &268536978
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268536976}
-  m_Mesh: {fileID: 0}
---- !u!23 &268536979
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 268536976}
-  m_Enabled: 1
-  m_CastShadows: 0
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
+  materials:
   - {fileID: 2100000, guid: b69be87327ebd7745824d9c5b3c6ae6b, type: 2}
   - {fileID: 2100000, guid: a74523414a7c5304a94b13519e81ffc5, type: 2}
   - {fileID: 2100000, guid: ea3311e5419d31e40b0dc290332200a8, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
+  rendererPrefab: {fileID: 6323211985259919070, guid: 47e5bb0b562068e478de72ffc53c87a3, type: 3}
+  meshParameters:
+    elevationScale: 1
+    modelElevation: 1
+  textureParameters:
+    colorMode: 0
+  terrainParameters:
+    grid_size: 6
+    axis: {x: 0, y: 1, z: 0}
+    seed: 
+    iterations: 1000
+    water_ratio: 0.49799999594688416
+  regenerateAutomatically: 0
+  savePrecalculatedData: 0
+  precalculatedData: {fileID: 0}
+  resetPlanet: 0
+  generateTerrain: 0
+  generateClimate: 0
+  instantiateRenderers: 0
+  regenerateMeshes: 0
+  regenerateTextures: 0
 --- !u!4 &268536980
 Transform:
   m_ObjectHideFlags: 0

@@ -1,17 +1,27 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Earthgen.planet.grid
 {
     public partial class Grid
     {
+        private static Dictionary<int, WeakReference<Grid>> GridsBySize = new();
         public static Grid size_n_grid(int size)
         {
+            if (GridsBySize.TryGetValue(size, out var gridRef) && gridRef.TryGetTarget(out var grid)) {
+                return grid;
+            }
+
             if (size == 0) {
-                return size_0_grid();
+                grid = size_0_grid();
             }
             else {
-                return _subdivided_grid(size_n_grid(size-1));
+                grid = _subdivided_grid(size_n_grid(size-1));
             }
+
+            GridsBySize[size] = new(grid);
+            return grid;
         }
         public static Grid size_0_grid()
         {
