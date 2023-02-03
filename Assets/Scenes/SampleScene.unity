@@ -155,12 +155,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   planet: {fileID: 0}
-  gridSize: 4
-  elevationScale: 10000
+  gridSize: 5
+  elevationScale: 5110
   modelElevation: 1
   rotationAxis: {x: 0, y: 1, z: 0}
   terrainParameters:
-    grid_size: 4
+    grid_size: 5
     axis: {x: 0, y: 1, z: 0}
     seed: 
     iterations: 1000
@@ -202,6 +202,7 @@ MeshRenderer:
   m_Materials:
   - {fileID: 2100000, guid: b69be87327ebd7745824d9c5b3c6ae6b, type: 2}
   - {fileID: 2100000, guid: a74523414a7c5304a94b13519e81ffc5, type: 2}
+  - {fileID: 2100000, guid: ea3311e5419d31e40b0dc290332200a8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

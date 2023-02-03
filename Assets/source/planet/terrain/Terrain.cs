@@ -39,6 +39,26 @@ namespace Earthgen.planet.terrain
         }
     }
 
+    public static class GridExtensions
+    {
+        public static Terrain_tile terrain(this Tile t, Planet p)
+        {
+            if (p.terrain.tiles?.Length > t.id) {
+                return p.terrain.nth_tile(t.id);
+            }
+            else {
+                return Terrain_tile.Default;
+            }
+        }
+
+        public static Terrain_corner terrain(this Corner c, Planet p) => p.terrain.corners.Length > c.id ? p.terrain.nth_corner(c.id) : Terrain_corner.Default;
+        public static Terrain_edge terrain(this Edge e, Planet p) => p.terrain.edges.Length > e.id ? p.terrain.nth_edge(e.id) : Terrain_edge.Default;
+
+        public static ref Terrain_tile m_terrain(this Tile t, Planet p) => ref p.terrain.m_tile(t.id);
+        public static ref Terrain_corner m_terrain(this Corner c, Planet p) => ref p.terrain.m_corner(c.id);
+        public static ref Terrain_edge m_terrain(this Edge e, Planet p) => ref p.terrain.m_edge(e.id);
+    }
+
     public static partial class PlanetExtensions
     {
         public static void clear_terrain(this Planet p)
