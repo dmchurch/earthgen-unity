@@ -1,12 +1,22 @@
-#include "climate_tile.h"
-#include "climate.h"
+using System;
 
-float temperature (const Climate_tile& t) {return t.temperature;}
-float humidity (const Climate_tile& t) {return t.humidity;}
-float aridity (const Climate_tile& t) {
-	return aridity(potential_evapotranspiration(t));
+namespace Earthgen.planet.climate
+{
+	[Serializable]
+	public struct Climate_tile
+	{
+		public Wind wind;
+		public float temperature;
+		public float humidity;
+		public float precipitation;
+
+		public float aridity () {
+			return Climate.aridity(potential_evapotranspiration());
+		}
+		public float potential_evapotranspiration () {
+			return Climate.saturation_humidity(temperature) - humidity;
+		}
+	}
+
+
 }
-float potential_evapotranspiration (const Climate_tile& t) {
-	return saturation_humidity(temperature(t)) - humidity(t);
-}
-float precipitation (const Climate_tile& t) {return t.precipitation;}

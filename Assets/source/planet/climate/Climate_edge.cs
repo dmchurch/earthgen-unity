@@ -1,4 +1,11 @@
-#include "climate_edge.h"
+using System;
 
-float wind_velocity (const Climate_edge& e) {return e.wind_velocity;}
-float river_flow (const Climate_edge& e) {return e.river_flow;}
+namespace Earthgen.planet.climate
+{
+	[Serializable]
+    public struct Climate_edge
+    {
+        public float wind_velocity;
+        public float river_flow;
+    }
+}

@@ -5,6 +5,7 @@ using UnityEngine;
 using Earthgen.planet;
 using Earthgen.planet.grid;
 using Earthgen.planet.terrain;
+using Earthgen.planet.climate;
 using System;
 using Grid = Earthgen.planet.grid.Grid;
 
@@ -22,6 +23,9 @@ public class PlanetGenerator : MonoBehaviour
 
     public Terrain_parameters terrainParameters = Terrain_parameters.Default;
     private Terrain_parameters oldTerrainParameters = Terrain_parameters.Default;
+
+    public Climate_parameters climateParameters = Climate_parameters.Default;
+    private Climate_parameters oldClimateParameters = Climate_parameters.Default;
     public bool regenerateAutomatically = false;
 
     [Header("Precalculated data")]
@@ -87,6 +91,12 @@ public class PlanetGenerator : MonoBehaviour
         }
         if (regenerateAutomatically && terrainParameters != oldTerrainParameters) {
             generateTerrain = true;
+            generateClimate = true;
+        } else if (regenerateAutomatically && climateParameters != oldClimateParameters) {
+            generateClimate = true;
+        }
+        if (generateClimate && (planet.terrain.tiles?.Length ?? 0) < planet.tile_count()) {
+            generateTerrain = true;
         }
         if (generateTerrain) {
             generateTerrain = false;
@@ -95,10 +105,14 @@ public class PlanetGenerator : MonoBehaviour
             regenerateMeshes = true;
             regenerateTextures = true;
             oldTerrainParameters = terrainParameters;
-            transform.rotation = planet.rotation();
         } else if (regenerateMeshes && planet.grid.size != terrainParameters.grid_size) {
             planet.set_grid_size(terrainParameters.grid_size);
             instantiateRenderers = true;
+        }
+        if (generateClimate) {
+            generateClimate = false;
+            planet.generate_climate(climateParameters);
+            oldClimateParameters = climateParameters;
         }
         if (instantiateRenderers) {
             InstantiateRenderers();

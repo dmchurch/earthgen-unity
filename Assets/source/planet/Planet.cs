@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Earthgen.planet.grid;
-//using Earthgen.planet.climate;
+using Earthgen.planet.climate;
 using Earthgen.planet.terrain;
 using System.Linq;
 using System;
@@ -17,20 +17,20 @@ namespace Earthgen.planet
             if (grid == null) {
                 grid = Grid.size_n_grid(0);
                 terrain = CreateInstance<Terrain>();
-                //climate = CreateInstance<Climate>();
+                climate = CreateInstance<Climate>();
             }
         }
 
         public Grid grid;
         public Terrain terrain;
-        //public Climate climate;
+        public Climate climate;
 
         [UnityEngine.ContextMenu("Clear Planet")]
         public void clear()
         {
             this.set_grid_size(0);
             this.clear_terrain();
-            //this.clear_climate();
+            this.clear_climate();
         }
 
 

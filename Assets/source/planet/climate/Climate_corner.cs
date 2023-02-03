@@ -1,3 +1,10 @@
-#include "climate_corner.h"
+using System;
 
-float river_flow_increase (const Climate_corner& c) {return c.river_flow_increase;}
+namespace Earthgen.planet.climate
+{
+	[Serializable]
+    public struct Climate_corner
+    {
+        public float river_flow_increase;
+    }
+}
