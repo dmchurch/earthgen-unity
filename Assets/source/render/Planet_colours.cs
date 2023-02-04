@@ -7,6 +7,7 @@ using Earthgen.planet.terrain;
 
 namespace Earthgen.render
 {
+	[Serializable]
 	public class Planet_colours
 	{
 		public Color[] tiles = new Color[0];

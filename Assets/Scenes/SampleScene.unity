@@ -162,7 +162,7 @@ MonoBehaviour:
     modelElevation: 1
   textureParameters:
     colorMode: 0
-    season: 0
+    yearProgress: 0
   terrainParameters:
     grid_size: 6
     axis: {x: 0, y: 1, z: 0}
@@ -175,13 +175,14 @@ MonoBehaviour:
     error_tolerance: 0.01
   regenerateAutomatically: 0
   savePrecalculatedData: 0
-  precalculatedData: {fileID: 0}
+  saveSceneHierarchy: 0
   resetPlanet: 0
   generateTerrain: 0
   generateClimate: 0
   instantiateRenderers: 0
   regenerateMeshes: 0
   regenerateTextures: 0
+  updatePrecalculatedData: 0
 --- !u!4 &268536980
 Transform:
   m_ObjectHideFlags: 0

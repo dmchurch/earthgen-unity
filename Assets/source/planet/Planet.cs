@@ -15,10 +15,10 @@ namespace Earthgen.planet
         public void OnEnable()
         {
             if (grid == null) {
-                grid = Grid.size_n_grid(0);
-                terrain = CreateInstance<Terrain>();
-                climate = CreateInstance<Climate>();
+                grid = Grid.size_n_grid(terrain ? terrain.var.grid_size : 0);
             }
+            terrain = terrain ? terrain : CreateInstance<Terrain>();
+            climate = climate ? climate : CreateInstance<Climate>();
         }
 
         public Grid grid;

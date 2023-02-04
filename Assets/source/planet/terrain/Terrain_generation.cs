@@ -31,6 +31,7 @@ namespace Earthgen.planet.terrain
 		static void _set_variables(this Planet p, Terrain_parameters par) {
 			p.terrain.var.axis = par.axis;
 			p.terrain.var.radius = 40000000;
+			p.terrain.var.grid_size = par.grid_size;
 		}
 
 		static void _set_elevation(this Planet p, Terrain_parameters par) {

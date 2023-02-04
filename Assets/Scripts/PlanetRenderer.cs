@@ -101,7 +101,7 @@ public class PlanetRenderer : MonoBehaviour
         List<int> seaTriangles = GenerateSubmesh(firstSeaVertex, seaLevel);
         int firstRiverVertex = vertices.Count;
         List<int> riverLines = doElevation ? GenerateRivers(firstRiverVertex) : new();
-    
+
         mesh.SetVertices(vertices);
         mesh.SetNormals(normals);
         mesh.SetUVs(0, uvs);
@@ -109,8 +109,7 @@ public class PlanetRenderer : MonoBehaviour
         mesh.SetTriangles(seaTriangles, 1, true, firstSeaVertex);
         mesh.SetIndices(riverLines, MeshTopology.Lines, 2, true, firstRiverVertex);
 
-        GetComponent<MeshFilter>().sharedMesh = mesh;
-        GetComponent<MeshRenderer>().sharedMaterials = materials;
+        UpdateComponents();
 
         int AddVertex(Vector3 pos, Vector3 normal, Vector2 uv)
         {
@@ -199,5 +198,11 @@ public class PlanetRenderer : MonoBehaviour
             return triangles;
         }
 
+    }
+
+    public void UpdateComponents()
+    {
+        GetComponent<MeshFilter>().sharedMesh = mesh;
+        GetComponent<MeshRenderer>().sharedMaterials = materials;
     }
 }

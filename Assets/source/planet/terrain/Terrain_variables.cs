@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Earthgen.planet.terrain
 {
+    [Serializable]
     public struct Terrain_variables
     {
+        public int grid_size; // what size was this terrain generated for
         public Vector3 axis;
         public double axial_tilt;
         public double radius;

@@ -1,5 +1,8 @@
-﻿namespace Earthgen.planet.climate
+﻿using System;
+
+namespace Earthgen.planet.climate
 {
+    [Serializable]
     public struct Season_variables
     {
         public float time_of_year;

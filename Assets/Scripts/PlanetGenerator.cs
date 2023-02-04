@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 using Earthgen.planet;
@@ -11,6 +12,7 @@ using Grid = Earthgen.planet.grid.Grid;
 using Earthgen.render;
 
 [ExecuteInEditMode]
+[RequireComponent(typeof(GeneratedPlanetData))]
 public class PlanetGenerator : MonoBehaviour
 {
     public Material[] materials;
@@ -31,7 +33,9 @@ public class PlanetGenerator : MonoBehaviour
 
     [Header("Precalculated data")]
     public bool savePrecalculatedData = false;
-    public GeneratedData precalculatedData = null;
+    public bool saveSceneHierarchy = false;
+    private bool oldSaveHierarchy = false;
+    private GeneratedPlanetData generatedData = null;
 
     [Header("Actions (check to execute)")]
     public bool resetPlanet;
@@ -41,54 +45,75 @@ public class PlanetGenerator : MonoBehaviour
     public bool instantiateRenderers;
     public bool regenerateMeshes;
     public bool regenerateTextures;
+    public bool updatePrecalculatedData;
 
     private PlanetRenderer[] renderers = new PlanetRenderer[0];
 
-    private Planet planet;
-    private Texture2D tileTexture;
-    private Mesh[] meshes;
-    private Planet_colours tileColors = new();
+    private ref Planet planet => ref generatedData.planet;
+    private ref Texture2D tileTexture => ref generatedData.tileTexture;
+    private ref Planet_colours planetColours => ref generatedData.planetColours;
 
-    // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        generatedData = GetComponent<GeneratedPlanetData>();
         renderers = GetComponentsInChildren<PlanetRenderer>();
+        Debug.Log($"Starting PlanetGenerator, {renderers.Length} renderers detected, generatedData = {generatedData}");
+        if (generatedData) {
+            Debug.Log($"Loading precalculated data: {planet.tile_count()} tiles, {planet.terrain.tiles?.Length ?? 0} terrain tiles, {planet.season_count()} seasons)");
+        }
 
-        if (precalculatedData) {
-            planet = precalculatedData.planet;
-            tileTexture = precalculatedData.tileTexture;
-        } else {
-            planet = new();
-            tileTexture = new(2048, 2048);
+        oldMeshParameters = meshParameters;
+        oldTextureParameters = textureParameters;
+        oldTerrainParameters = terrainParameters;
+        oldClimateParameters = climateParameters;
+        oldSaveHierarchy = saveSceneHierarchy;
+
+        if (!generatedData) {
+            Debug.Log($"No precalculated data, creating new and resetting planet");
+            generatedData = gameObject.AddComponent<GeneratedPlanetData>();
             resetPlanet = true;
-            instantiateRenderers = true;
             regenerateMeshes = true;
             regenerateTextures = true;
         }
 
-        //if (!planet) {
-        //    planet = ScriptableObject.CreateInstance<Planet>();
-        //}
-        //meshDirty = true;
-        //textureDirty = true;
+        instantiateRenderers = true;
+
+        generatedData.Awake();
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!generatedData) {
+            Awake();
+        } else if (!planet || !tileTexture || planetColours == null) {
+            generatedData.Awake();
+        }
+        if (materials[0].mainTexture != tileTexture) {
+            materials[0].mainTexture = tileTexture;
+            materials[1].mainTexture = tileTexture;
+        }
         if (meshParameters != oldMeshParameters) {
             regenerateMeshes = true;
         }
         if (textureParameters != oldTextureParameters) {
             regenerateTextures = true;
         }
+        generatedData.hideFlags = savePrecalculatedData ? HideFlags.None : (HideFlags.NotEditable | HideFlags.DontSave);
+        if (saveSceneHierarchy != oldSaveHierarchy) {
+            foreach (var r in renderers) {
+                r.gameObject.hideFlags = saveSceneHierarchy ? HideFlags.None : (HideFlags.DontSaveInEditor | HideFlags.NotEditable);
+            }
+            oldSaveHierarchy = saveSceneHierarchy;
+        }
         if (resetPlanet) {
-            if (!planet) planet = ScriptableObject.CreateInstance<Planet>();
+            Debug.Log($"Resetting planet");
             planet.name = $"{gameObject.name} [Planet data]";
             planet.clear();
             instantiateRenderers = true;
             regenerateMeshes = true;
             regenerateTextures = true;
+            updatePrecalculatedData = true;
             resetPlanet = false;
         }
         if (regenerateAutomatically && terrainParameters != oldTerrainParameters) {
@@ -124,6 +149,7 @@ public class PlanetGenerator : MonoBehaviour
                 renderer.GenerateMesh(meshParameters);
             }
             oldMeshParameters = meshParameters;
+            updatePrecalculatedData = true;
             regenerateMeshes = false;
         }
         if (regenerateTextures) {
@@ -131,11 +157,15 @@ public class PlanetGenerator : MonoBehaviour
             regenerateTextures = false;
             if (!tileTexture) {
                 tileTexture = new Texture2D(2048, 2048);
-                tileTexture.name = $"gameObject.name [Tile Texture]";
+                tileTexture.name = $"{gameObject.name} [Tile Texture]";
+                updatePrecalculatedData = true;
             }
             GenerateTextures();
             materials[0].mainTexture = tileTexture;
             materials[1].mainTexture = tileTexture;
+        }
+        if (updatePrecalculatedData) {
+            updatePrecalculatedData = false;
         }
     }
 
@@ -167,8 +197,13 @@ public class PlanetGenerator : MonoBehaviour
             renderer.firstTile = i * PlanetRenderer.MaxTiles;
             renderer.planet = planet;
             renderer.materials = materials;
+            if (generatedData && (generatedData.meshes?.Length ?? 0) > i && generatedData.meshes[i]) {
+                renderer.mesh = generatedData.meshes[i];
+                renderer.UpdateComponents();
+            }
         }
         instantiateRenderers = false;
+        updatePrecalculatedData = true;
     }
 
     public void GenerateTextures()
@@ -180,13 +215,13 @@ public class PlanetGenerator : MonoBehaviour
         Color[] colors = new Color[Mathf.CeilToInt((pixelsPerTile + 1) * (pixelsPerTile + 1))];
         var colorSpan = colors.AsSpan();
 
-        tileColors.init_colours(planet);
+        planetColours.init_colours(planet);
         if (planet.season_count() > 0) {
             Season season = planet.nth_season(Math.Clamp(Mathf.FloorToInt(textureParameters.yearProgress * planet.season_count()),
                                                          0, planet.season_count() - 1));
-            tileColors.set_colours(planet, season, textureParameters.colorMode);
+            planetColours.set_colours(planet, season, textureParameters.colorMode);
         } else {
-            tileColors.set_colours(planet, textureParameters.colorMode);
+            planetColours.set_colours(planet, textureParameters.colorMode);
         }
 
         for (int i = 0; i < planet.tile_count(); i++) {
@@ -197,7 +232,7 @@ public class PlanetGenerator : MonoBehaviour
             int uMax = Mathf.RoundToInt((x + 1) * pixelsPerTile);
             int vMax = Mathf.RoundToInt((y + 1) * pixelsPerTile);
 
-            Color color = tileColors.tiles[i];
+            Color color = planetColours.tiles[i];
 
             colorSpan.Fill(color);
 
@@ -252,11 +287,4 @@ public class PlanetGenerator : MonoBehaviour
         #endregion
     }
 
-    public class GeneratedData : ScriptableObject
-    {
-        public Planet planet;
-        public Texture2D tileTexture;
-        public Mesh[] meshes;
-        public Planet_colours planetColors;
-    }
 }
