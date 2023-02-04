@@ -8,6 +8,7 @@ using Earthgen.planet.terrain;
 using Earthgen.planet.climate;
 using System;
 using Grid = Earthgen.planet.grid.Grid;
+using Earthgen.render;
 
 [ExecuteInEditMode]
 public class PlanetGenerator : MonoBehaviour
@@ -46,6 +47,7 @@ public class PlanetGenerator : MonoBehaviour
     private Planet planet;
     private Texture2D tileTexture;
     private Mesh[] meshes;
+    private Planet_colours tileColors = new();
 
     // Start is called before the first frame update
     void Start()
@@ -178,19 +180,14 @@ public class PlanetGenerator : MonoBehaviour
         Color[] colors = new Color[Mathf.CeilToInt((pixelsPerTile + 1) * (pixelsPerTile + 1))];
         var colorSpan = colors.AsSpan();
 
-	    Color water_deep = new(0.0f, 0.0f, 0.25f);
-	    Color water = new(0.0f, 0.12f, 0.5f);
-	    Color water_shallow = new(0.0f, 0.4f, 0.6f);
-
-        var land = new (float limit, Color color)[]
-        {
-		    (-500, new(0.0f, 0.4f, 0.0f)),
-		    (0, new(0.0f, 0.7f, 0.0f)),
-		    (1000, new(1.0f, 1.0f, 0.0f)),
-		    (1500, new(1.0f, 0.5f, 0.0f)),
-		    (2000, new(0.7f, 0.0f, 0.0f)),
-		    (2500, new(0.1f, 0.1f, 0.1f)),
-        };
+        tileColors.init_colours(planet);
+        if (planet.season_count() > 0) {
+            Season season = planet.nth_season(Math.Clamp(Mathf.FloorToInt(textureParameters.yearProgress * planet.season_count()),
+                                                         0, planet.season_count() - 1));
+            tileColors.set_colours(planet, season, textureParameters.colorMode);
+        } else {
+            tileColors.set_colours(planet, textureParameters.colorMode);
+        }
 
         for (int i = 0; i < planet.tile_count(); i++) {
             int x = i % tilesPerSide;
@@ -200,30 +197,7 @@ public class PlanetGenerator : MonoBehaviour
             int uMax = Mathf.RoundToInt((x + 1) * pixelsPerTile);
             int vMax = Mathf.RoundToInt((y + 1) * pixelsPerTile);
 
-            Tile t = planet.nth_tile(i);
-            Terrain_tile ter = t.terrain(planet);
-            float elev = ter.elevation - (float)planet.sea_level();
-            Color color;
-            if (ter.is_water()) {
-                if (elev < -1000) {
-                    color = water_deep;
-                } else if (elev < -500) {
-                    float d = (elev + 500) / (-500);
-                    color = Color.Lerp(water, water_deep, d);
-                } else {
-                    float d = elev/-500;
-                    color = Color.Lerp(water_shallow, water, d);
-                }
-            } else {
-                color = land[5].color;
-                for (int j = 0; j < 5; j++) {
-                    if (elev <= land[j+1].limit) {
-                        float d = (elev - land[j].limit) / (land[j+1].limit / land[j].limit);
-                        color = Color.Lerp(land[j].color, land[j+1].color, d);
-                        break;
-                    }
-                }
-            }
+            Color color = tileColors.tiles[i];
 
             colorSpan.Fill(color);
 
@@ -258,25 +232,20 @@ public class PlanetGenerator : MonoBehaviour
     [Serializable]
     public struct TextureParameters : IEquatable<TextureParameters>
     {
-        public enum ColorMode
-        {
-            Topography,
-            Vegetation,
-            Temperature,
-            Aridity,
-            Humidity,
-            Precipitation,
-        };
-        public ColorMode colorMode;
+        public Planet_colours.Mode colorMode;
+        [Range(0,1)]
+        public float yearProgress;
+
         public static readonly TextureParameters Default = new()
         {
-
+            colorMode = Planet_colours.Mode.Vegetation,
+            yearProgress = 0,
         };
 
         #region Boilerplate (Equals, GetHashCode, ==, !=)
         public override bool Equals(object obj) => obj is TextureParameters parameters && Equals(parameters);
-        public bool Equals(TextureParameters other) => colorMode == other.colorMode;
-        public override int GetHashCode() => HashCode.Combine(colorMode);
+        public bool Equals(TextureParameters other) => colorMode == other.colorMode && yearProgress == other.yearProgress;
+        public override int GetHashCode() => HashCode.Combine(colorMode, yearProgress);
 
         public static bool operator ==(TextureParameters left, TextureParameters right) => left.Equals(right);
         public static bool operator !=(TextureParameters left, TextureParameters right) => !(left == right);
@@ -288,5 +257,6 @@ public class PlanetGenerator : MonoBehaviour
         public Planet planet;
         public Texture2D tileTexture;
         public Mesh[] meshes;
+        public Planet_colours planetColors;
     }
 }
