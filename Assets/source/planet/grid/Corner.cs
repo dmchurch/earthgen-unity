@@ -1,49 +1,84 @@
-#include "corner.h"
+using UnityEngine;
 
-Corner::Corner (int i) :
-	id (i) {
-	for (auto& t : tiles)
-		t = nullptr;
-	for (auto& c : corners)
-		c = nullptr;
-	for (auto& e : edges)
-		e = nullptr;
+namespace Earthgen.planet.grid
+{
+	public class Corner
+	{
+		public readonly int id;
+		public Vector3 v;
+		public readonly Tile[] tiles;
+		public readonly Corner[] corners;
+		public readonly Edge[] edges;
+
+		public Corner(int id)
+		{
+			this.id = id;
+			tiles = new Tile[3];
+			corners = new Corner[3];
+			edges = new Edge[3];
+		}
+
+		public int position (Tile t) {
+			var c = this;
+			for (int i=0; i<3; i++)
+				if (c.tiles[i] == t)
+					return i;
+			return -1;
+		}
+		public int position (Corner n) {
+			var c = this;
+			for (int i=0; i<3; i++)
+				if (c.corners[i] == n)
+					return i;
+			return -1;
+		}
+		public int position (Edge e) {
+			var c = this;
+			for (int i=0; i<3; i++)
+				if (c.edges[i] == e)
+					return i;
+			return -1;
+		}
+
+		public Corner nth_corner(int i)
+		{
+			var c = this;
+			int k = i < 0 ?
+				i%3 + 3 :
+				i%3;
+			return c.corners[k];
+		}
+
+		public Edge nth_edge(int i)
+		{
+			var c = this;
+			int k = i < 0 ?
+				i%3 + 3 :
+				i%3;
+			return c.edges[k];
+		}
+	}
 }
 
-int position (const Corner& c, const Tile* t) {
-	for (int i=0; i<3; i++)
-		if (c.tiles[i] == t)
-			return i;
-	return -1;
-}
-int position (const Corner& c, const Corner* n) {
-	for (int i=0; i<3; i++)
-		if (c.corners[i] == n)
-			return i;
-	return -1;
-}
-int position (const Corner& c, const Edge* e) {
-	for (int i=0; i<3; i++)
-		if (c.edges[i] == e)
-			return i;
-	return -1;
+namespace Earthgen
+{
+	using Earthgen.planet.grid;
+	public static partial class Statics
+	{
+		public static Corner Corner(int id) => new(id);
+		public static int id (Corner c) => c.id;
+		public static Vector3 vector (Corner c) => c.v;
+		public static Tile[] tiles (Corner c) => c.tiles;
+		public static Corner[] corners (Corner c) => c.corners;
+		public static Edge[] edges (Corner c) => c.edges;
+
+		public static int position(Corner c, Tile t) => c.position(t);
+		public static int position(Corner c, Corner n) => c.position(n);
+		public static int position(Corner c, Edge e) => c.position(e);
+
+		public static Corner nth_corner (Corner c, int i) => c.nth_corner(i);
+		public static Edge nth_edge (Corner c, int i) => c.nth_edge(i);
+
+	}
 }
 
-int id (const Corner& c) {return c.id;}
-const Vector3& vector (const Corner& c) {return c.v;}
-const std::array<const Tile*, 3>& tiles (const Corner& c) {return c.tiles;}
-const std::array<const Corner*, 3>& corners (const Corner& c) {return c.corners;}
-const std::array<const Edge*, 3>& edges (const Corner& c) {return c.edges;}
-
-const Corner* nth_corner (const Corner& c, int i) {
-	int k = i < 0 ?
-		i%3 + 3 :
-		i%3;
-	return c.corners[k];
-}
-const Edge* nth_edge (const Corner& c, int i) {
-	int k = i < 0 ?
-		i%3 + 3 :
-		i%3;
-	return c.edges[k];
-}

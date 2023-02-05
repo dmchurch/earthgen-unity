@@ -1,86 +1,136 @@
-#include "tile.h"
-#include "corner.h"
-#include "../../math/math_common.h"
+using System.Collections.Generic;
+using UnityEngine;
 
-Tile::Tile (int i, int e) :
-	id (i), edge_count (e) {
-	tiles.resize(edge_count, nullptr);
-	corners.resize(edge_count, nullptr);
-	edges.resize(edge_count, nullptr);
-}
+using static Earthgen.Statics;
 
-int position (const Tile& t, const Tile* n) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.tiles[i] == n)
-			return i;
-	return -1;
-}
+namespace Earthgen.planet.grid
+{
+	public class Tile
+	{
+		public readonly int id;
+		public readonly int edge_count;
+		public Vector3 v;
+		public readonly Tile[] tiles;
+		public readonly Corner[] corners;
+		public readonly Edge[] edges;
 
-int position (const Tile& t, const Corner* c) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.corners[i] == c)
-			return i;
-	return -1;
-}
+		public Tile(int id, int edge_count)
+		{
+			this.id = id;
+			this.edge_count = edge_count;
+			tiles = new Tile[edge_count];
+			corners = new Corner[edge_count];
+			edges = new Edge[edge_count];
+		}
 
-int position (const Tile& t, const Edge* e) {
-	for (int i=0; i<t.edge_count; i++)
-		if (t.edges[i] == e)
-			return i;
-	return -1;
-}
+		public int position (Tile n) {
+			var t = this;
+			for (int i=0; i<t.edge_count; i++)
+				if (t.tiles[i] == n)
+					return i;
+			return -1;
+		}
 
-int id (const Tile& t) {return t.id;}
-int edge_count (const Tile& t) {return t.edge_count;}
-const Vector3& vector (const Tile& t) {return t.v;}
-const std::vector<const Tile*>& tiles (const Tile& t) {return t.tiles;}
-const std::vector<const Corner*>& corners (const Tile& t) {return t.corners;}
-const std::vector<const Edge*>& edges (const Tile& t) {return t.edges;}
+		public int position (Corner c) {
+			var t = this;
+			for (int i=0; i<t.edge_count; i++)
+				if (t.corners[i] == c)
+					return i;
+			return -1;
+		}
 
-const Tile* nth_tile (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.tiles[k];
-}
+		public int position (Edge e) {
+			var t = this;
+			for (int i=0; i<t.edge_count; i++)
+				if (t.edges[i] == e)
+					return i;
+			return -1;
+		}
 
-const Corner* nth_corner (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.corners[k];
-}
+		public Tile nth_tile (int n) {
+			var t = this;
+			int k = n < 0 ?
+				n % edge_count(t) + edge_count(t) :
+				n % edge_count(t);
+			return t.tiles[k];
+		}
 
-const Edge* nth_edge (const Tile& t, int n) {
-	int k = n < 0 ?
-		n % edge_count(t) + edge_count(t) :
-		n % edge_count(t);
-	return t.edges[k];
-}
+		public Corner nth_corner (int n) {
+			var t = this;
+			int k = n < 0 ?
+				n % edge_count(t) + edge_count(t) :
+				n % edge_count(t);
+			return t.corners[k];
+		}
 
-Quaternion reference_rotation (const Tile* t, Quaternion d) {
-	Vector3 v = d * vector(t);
-	Quaternion h = Quaternion();
-	if (v.x != 0 || v.y != 0) {
-		if (v.y != 0) h = Quaternion(normal(Vector3(v.x, v.y, 0)), Vector3(-1,0,0));
-		else if (v.x > 0) h = Quaternion(Vector3(0,0,1), pi);
+		public Edge nth_edge (int n) {
+			var t = this;
+			int k = n < 0 ?
+				n % edge_count(t) + edge_count(t) :
+				n % edge_count(t);
+			return t.edges[k];
+		}
+
+		public Quaternion reference_rotation (Quaternion d) {
+			var t = this;
+			Vector3 v = d * vector(t);
+			Quaternion h = Quaternion();
+			if (v.x != 0 || v.y != 0) {
+				if (v.y != 0) h = Quaternion(normal(Vector3(v.x, v.y, 0)), Vector3(-1,0,0));
+				else if (v.x > 0) h = Quaternion(Vector3(0,0,1), pi);
+			}
+			Quaternion q = Quaternion();
+			if (v.x == 0 && v.y == 0) {
+				if (v.z < 0) q = Quaternion(Vector3(1,0,0), pi);
+			}
+			else {
+				q = Quaternion(h*v, Vector3(0,0,1));
+			}
+			return q*h*d;
+		}
+
+		public List<Vector2> polygon (Quaternion d) {
+			var t = this;
+			List<Vector2> p = new();
+			Quaternion q = reference_rotation(t, d);
+			for (int i=0; i<edge_count(t); i++) {
+				Vector3 c = q * vector(nth_corner(t, i));
+				p.push_back(Vector2(c.x, c.y));
+			}
+			return p;
+		}
+
+		private static Quaternion reference_rotation(Tile t, Quaternion d) => t.reference_rotation(d);
+		private static Corner nth_corner(Tile t, int i) => t.nth_corner(i);
 	}
-	Quaternion q = Quaternion();
-	if (v.x == 0 && v.y == 0) {
-		if (v.z < 0) q = Quaternion(Vector3(1,0,0), pi);
-	}
-	else {
-		q = Quaternion(h*v, Vector3(0,0,1));
-	}
-	return q*h*d;
 }
 
-std::vector<Vector2> polygon (const Tile* t, Quaternion d) {
-	std::vector<Vector2> p;
-	Quaternion q = reference_rotation(t, d);
-	for (int i=0; i<edge_count(t); i++) {
-		Vector3 c = q * vector(nth_corner(t, i));
-		p.push_back(Vector2(c.x, c.y));
+namespace Earthgen
+{
+	using Earthgen.planet.grid;
+	using System.Collections.Generic;
+
+	public static partial class Statics
+	{
+		public static Tile Tile(int id, int edge_count) => new(id, edge_count);
+		public static int position(Tile t, Tile n) => t.position(n);
+		public static int position(Tile t, Corner c) => t.position(c);
+		public static int position(Tile t, Edge e) => t.position(e);
+
+		public static int id(Tile t) => t.id;
+		public static int edge_count(Tile t) => t.edge_count;
+		public static Vector3 vector(Tile t) => t.v;
+
+		public static Tile[] tiles(Tile t) => t.tiles;
+		public static Corner[] corners(Tile t) => t.corners;
+		public static Edge[] edges(Tile t) => t.edges;
+
+		public static Tile nth_tile (Tile t, int n) => t.nth_tile(n);
+		public static Corner nth_corner (Tile t, int n) => t.nth_corner(n);
+		public static Edge nth_edge (Tile t, int n) => t.nth_edge(n);
+
+		public static Quaternion reference_rotation(Tile t, Quaternion d) => t.reference_rotation(d);
+		public static List<Vector2> polygon(Tile t, Quaternion d) => t.polygon(d);
 	}
-	return p;
+
 }

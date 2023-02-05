@@ -1,49 +1,76 @@
-#include "edge.h"
+namespace Earthgen.planet.grid
+{
+	public class Edge
+	{
+		public readonly int id;
+		public readonly Tile[] tiles;
+		public readonly Corner[] corners;
 
-Edge::Edge (int i) :
-	id (i) {
-	for (auto& t : tiles)
-		t = nullptr;
-	for (auto& c : corners)
-		c = nullptr;
+		public Edge(int id)
+		{
+			this.id = id;
+			tiles = new Tile[2];
+			corners = new Corner[2];
+		}
+
+		public int position (Tile t) {
+			var e = this;
+			if (e.tiles[0] == t)
+				return 0;
+			else if (e.tiles[1] == t)
+				return 1;
+			return -1;
+		}
+		public int position (Corner c) {
+			var e = this;
+			if (e.corners[0] == c)
+				return 0;
+			else if (e.corners[1] == c)
+				return 1;
+			return -1;
+		}
+
+		public int sign (Tile t) {
+			var e = this;
+			if (e.tiles[0] == t)
+				return 1;
+			else if (e.tiles[1] == t)
+				return -1;
+			return 0;
+		}
+		public int sign (Corner c) {
+			var e = this;
+			if (e.corners[0] == c)
+				return 1;
+			else if (e.corners[1] == c)
+				return -1;
+			return 0;
+		}
+
+	}
 }
 
-int position (const Edge& e, const Tile* t) {
-	if (e.tiles[0] == t)
-		return 0;
-	else if (e.tiles[1] == t)
-		return 1;
-	return -1;
-}
-int position (const Edge& e, const Corner* c) {
-	if (e.corners[0] == c)
-		return 0;
-	else if (e.corners[1] == c)
-		return 1;
-	return -1;
+namespace Earthgen
+{
+	using Earthgen.planet.grid;
+	public static partial class Statics
+	{
+		public static Edge Edge(int id) => new(id);
+		public static int position(Edge e, Tile t) => e.position(t);
+		public static int position(Edge e, Corner c) => e.position(c);
+		public static int sign(Edge e, Tile t) => e.sign(t);
+		public static int sign(Edge e, Corner c) => e.sign(c);
+
+		public static int id (Edge e) => e.id;
+		public static Tile[] tiles (Edge e) => e.tiles;
+		public static Corner[] corners (Edge e) => e.corners;
+
+		public static Tile nth_tile (Edge e, int i) {
+			return e.tiles[i];
+		}
+		public static Corner nth_corner (Edge e, int i) {
+			return e.corners[i];
+		}
+	}
 }
 
-int sign (const Edge& e, const Tile* t) {
-	if (e.tiles[0] == t)
-		return 1;
-	else if (e.tiles[1] == t)
-		return -1;
-	return 0;
-}
-int sign (const Edge& e, const Corner* c) {
-	if (e.corners[0] == c)
-		return 1;
-	else if (e.corners[1] == c)
-		return -1;
-	return 0;
-}
-
-int id (const Edge& e) {return e.id;}
-const std::array<const Tile*, 2>& tiles (const Edge& e) {return e.tiles;}
-const std::array<const Corner*, 2>& corners (const Edge& e) {return e.corners;}
-const Tile* nth_tile (const Edge& e, int i) {
-	return e.tiles[i];
-}
-const Corner* nth_corner (const Edge& e, int i) {
-	return e.corners[i];
-}
