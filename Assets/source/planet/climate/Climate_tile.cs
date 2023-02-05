@@ -5,6 +5,7 @@ namespace Earthgen.planet.climate
 	[Serializable]
 	public struct Climate_tile
 	{
+		public static readonly Climate_tile Default = default;
 		public Wind wind;
 		public float temperature;
 		public float humidity;

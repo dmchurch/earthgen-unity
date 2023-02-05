@@ -19,7 +19,7 @@ namespace Earthgen.planet.terrain
         public static double latitude(Vector3 v) => Mathf.Asin(v.y);
         public static double longitude(Vector3 v) => v.x == 0 && v.z == 0 ? 0 : Mathf.Atan2(v.z, v.x);
 
-        public static Vector3 default_axis() => Vector3.up;
+        public static Vector3 default_axis() => Vector3.up; // using unity's +y as up axis, NOT original +z
 
         public Terrain_tile nth_tile(int n) => tiles[n];
         public Terrain_corner nth_corner(int n) => corners[n];

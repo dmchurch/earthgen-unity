@@ -145,7 +145,7 @@ public class PlanetGenerator : MonoBehaviour
             InstantiateRenderers();
         }
         if (regenerateMeshes) {
-            foreach (var renderer in renderers) {
+            foreach (var renderer in GetComponentsInChildren<PlanetRenderer>() /*renderers*/) {
                 renderer.GenerateMesh(meshParameters);
             }
             oldMeshParameters = meshParameters;
@@ -172,7 +172,7 @@ public class PlanetGenerator : MonoBehaviour
     private void InstantiateRenderers(bool removeUnused = true)
     {
         int tileCount = Grid.tile_count(terrainParameters.grid_size);
-        int renderersNeeded = Mathf.CeilToInt((float)tileCount / PlanetRenderer.MaxTiles);
+        int renderersNeeded = Mathf.CeilToInt((float)tileCount / 1);// PlanetRenderer.MaxTiles);
 
         renderers = GetComponentsInChildren<PlanetRenderer>();
 
@@ -194,7 +194,8 @@ public class PlanetGenerator : MonoBehaviour
                 renderers[i] = renderer;
             }
             renderer.gameObject.name = $"{name} [Renderer {i}]";
-            renderer.firstTile = i * PlanetRenderer.MaxTiles;
+            renderer.firstTile = i; // * PlanetRenderer.MaxTiles;
+            renderer.tileCount = 1; //Math.Min(PlanetRenderer.MaxTiles, tileCount - renderer.firstTile);
             renderer.planet = planet;
             renderer.materials = materials;
             if (generatedData && (generatedData.meshes?.Length ?? 0) > i && generatedData.meshes[i]) {

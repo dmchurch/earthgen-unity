@@ -74,17 +74,30 @@ namespace Earthgen.planet.grid
         public Quaternion reference_rotation(Quaternion d)
 		{
 			Vector3 v = d * this.v;
+//			Debug.Log($"getting reference rotation for tile {id} with v {this.v} and rotation {d}, rotated {v}");
 			Quaternion h = Quaternion.identity;
-			if (v.x != 0 || v.y != 0) {
-				if (v.y != 0) h = Quaternion.FromToRotation(new Vector3(v.x, v.y, 0).normalized, new Vector3(-1,0,0));
-				else if (v.x > 0) h = Quaternion.AngleAxis(Mathf.PI, new Vector3(0,0,1));
+			if (v.x != 0 || v.z != 0) { // If this tile is not at one of the poles;
+				if (v.z != 0) { // if it has any forward/back component;
+					// rotate around to put the tile on the -x semicircle
+					h = Quaternion.FromToRotation(new Vector3(v.x, 0, v.z).normalized, new Vector3(-1,0,0));
+				}
+				else if (v.x > 0) { // if it is on the +x semicircle;
+					// rotate 180 degrees around the poles to put it on -x
+					h = Quaternion.AngleAxis(180, new Vector3(0,1,0));
+				}
 			}
+			// at this point, the rotated vector h*d is either one of the poles or on the -x semicircle;
+			// the z component is 0
 			Quaternion q = Quaternion.identity;
-			if (v.x == 0 && v.y == 0) {
-				if (v.z < 0) q = Quaternion.AngleAxis(Mathf.PI, new Vector3(1,0,0));
+			if (v.x == 0 && v.z == 0) { // If this tile is at one of the poles;
+				if (v.y < 0) { // If it's the south pole;
+					// rotate it around the x axis to put it at the north pole
+					q = Quaternion.AngleAxis(180, new Vector3(1,0,0));
+				}
 			}
-			else {
-				q = Quaternion.FromToRotation(h*v, new Vector3(0,0,1));
+			else { // Otherwise it's on the -x semicircle;
+				// So use quaternions to put it directly at the north pole
+				q = Quaternion.FromToRotation(h*v, new Vector3(0,1,0));
 			}
 			return q*h*d;
 		}
@@ -95,8 +108,9 @@ namespace Earthgen.planet.grid
 			Quaternion q = reference_rotation(d);
 			for (int i=0; i<edge_count; i++) {
 				Vector3 c = q * nth_corner(i).v;
-				p.Add(new Vector2(c.x, c.y));
+				p.Add(new Vector2(c.x, c.z));
 			}
+			//Debug.Log($"polygon for tile {id} with v {v} at rotation {d}: {string.Join(", ", p)}");
 			return p;
 		}
 

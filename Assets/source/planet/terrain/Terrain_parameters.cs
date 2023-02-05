@@ -30,7 +30,7 @@ namespace Earthgen.planet.terrain
 			grid_size = Math.Clamp(grid_size, 0, 10);
 
 			if (axis == Vector3.zero)
-				axis = new Vector3(0,0,1);
+				axis = Terrain.default_axis();
 			else {
 				axis = axis.normalized;
 			}
