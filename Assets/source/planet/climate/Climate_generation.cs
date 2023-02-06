@@ -280,6 +280,11 @@ namespace Earthgen.planet.climate
 			*/
 		}
 	}
+	public static partial class PlanetExtensions
+	{
+		public static void generate_climate(this Planet p, Climate_parameters par) => Climate_generation.generate_climate(p, par);
+		public static void generate_season(this Planet p, Climate_parameters par, float time_of_year) => Climate_generation.generate_season(p, par, time_of_year);	
+	}
 }
 
 namespace Earthgen

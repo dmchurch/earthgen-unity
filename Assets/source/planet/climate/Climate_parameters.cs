@@ -1,5 +1,5 @@
 ﻿using System;
-
+using UnityEngine;
 using static Earthgen.Statics;
 
 namespace Earthgen.planet.climate
@@ -15,12 +15,14 @@ namespace Earthgen.planet.climate
 		};
 
 		public int seasons;
+		[Range(0,90)]
 		public float axialTiltInDegrees;
 		public AngleFloat axial_tilt
 		{
 			get => AngleFloat.FromDegrees(axialTiltInDegrees);
 			set => axialTiltInDegrees = value.Degrees;
 		}
+		[Range(0.001f, 1.0f)]
 		public float error_tolerance;
 
 		public void set_default() => this = Default;

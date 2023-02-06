@@ -1,0 +1,12 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/Scripts/Editor/PlanetGeneratorEditor.uss?fileID=7433441132597879392&amp;guid=dd2c3e02727f384419ea976d93de1bae&amp;type=3#PlanetGeneratorEditor" />
+    <uie:PropertyField label="Terrain Generation Parameters" binding-path="terrainParameters" name="terrainParameters" />
+    <uie:PropertyField label="Climate Generation Parameters" binding-path="climateParameters" name="climateParameters" />
+    <ui:Toggle name="AutoRegenerate" text="Automatically regenerate data?" tooltip="If checked, the PlanetGenerator will generate new data whenever the input parameters change." />
+    <ui:HelpBox name="saveDataWarning" message-type="Info" text="All generated planet data will be saved in the asset tree. This will increase the size of your Scene file." style="display: none;" />
+    <ui:Button text="Generate Terrain" display-tooltip-when-elided="true" name="Generate_Terrain" />
+    <ui:Button text="Generate Climate" display-tooltip-when-elided="true" name="Generate_Climate" />
+    <uie:PropertyField label="Save Generated Data?" binding-path="saveGeneratedData" name="saveGeneratedData" />
+    <ui:Toggle text="Show Default Inspector" name="DefaultInspectorToggle" />
+    <ui:HelpBox name="Default_Inspector" message-type="None" style="flex-direction: column; align-items: stretch; padding-left: 20px; padding-right: 8px; padding-top: 0;" />
+</ui:UXML>

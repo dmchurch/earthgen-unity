@@ -24,6 +24,8 @@ namespace Earthgen.planet.terrain
 		public void init_terrain(Planet p)
 		{
 			tiles = new Terrain_tile[tile_count(p)];
+			corners = new Terrain_corner[corner_count(p)];
+			edges = new Terrain_edge[edge_count(p)];
 		}
 
 		public static AngleFloat latitude (Vector3 v) {
