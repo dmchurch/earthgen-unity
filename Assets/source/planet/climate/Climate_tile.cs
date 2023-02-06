@@ -1,12 +1,39 @@
-#include "climate_tile.h"
-#include "climate.h"
+using System;
+using static Earthgen.Statics;
 
-float temperature (const Climate_tile& t) {return t.temperature;}
-float humidity (const Climate_tile& t) {return t.humidity;}
-float aridity (const Climate_tile& t) {
-	return aridity(potential_evapotranspiration(t));
+namespace Earthgen.planet.climate
+{
+    [Serializable]
+	public struct Climate_tile
+	{
+		public Wind wind;
+		public float temperatureInDegreesCelsius;
+		public TemperatureFloat temperature 
+		{
+			get => TemperatureFloat.FromDegreesC(temperatureInDegreesCelsius);
+			set => temperatureInDegreesCelsius = value.Celsius;
+		}
+		public float humidity;
+		public float precipitation;
+
+		public float aridity => Climate.aridity(potential_evapotranspiration);
+		public float potential_evapotranspiration => saturation_humidity(temperature - humidity);
+	}
 }
-float potential_evapotranspiration (const Climate_tile& t) {
-	return saturation_humidity(temperature(t)) - humidity(t);
+
+namespace Earthgen
+{
+	using Earthgen.planet.climate;
+	public static partial class Statics
+	{
+		public static TemperatureFloat temperature (Climate_tile t) => t.temperature;
+		public static float humidity (Climate_tile t) => t.humidity;
+		public static float aridity (Climate_tile t) {
+			return aridity(potential_evapotranspiration(t));
+		}
+		public static float potential_evapotranspiration (Climate_tile t) {
+			return saturation_humidity(temperature(t)) - humidity(t);
+		}
+		public static float precipitation (Climate_tile t) => t.precipitation;
+	}
 }
-float precipitation (const Climate_tile& t) {return t.precipitation;}

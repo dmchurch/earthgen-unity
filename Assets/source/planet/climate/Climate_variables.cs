@@ -1,4 +1,21 @@
-#include "climate_variables.h"
-#include "../planet.h"
+namespace Earthgen.planet.climate
+{
+    public struct Climate_variables
+    {
+        public int season_count;
+    }
 
-int season_count (const Planet& p) {return climate(p).var.season_count;}
+    public static partial class PlanetExtensions
+    {
+        public static int season_count (this Planet p) => climate(p).var.season_count;
+    }
+}
+
+namespace Earthgen
+{
+    public static partial class Statics
+    {
+        public static int season_count (planet.Planet p) => planet.climate.PlanetExtensions.season_count(p);
+
+    }
+}

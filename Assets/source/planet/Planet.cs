@@ -2,6 +2,7 @@ using System;
 
 using Earthgen.planet.grid;
 using Earthgen.planet.terrain;
+using Earthgen.planet.climate;
 
 using static Earthgen.Statics;
 
@@ -28,9 +29,6 @@ namespace Earthgen.planet
 			clear_climate(p);
 		}
 	}
-
-	// Stand-ins
-	public class Climate { };
 }
 
 namespace Earthgen
@@ -39,9 +37,6 @@ namespace Earthgen
 	public static partial class Statics
 	{
 		public static void clear(Planet p) => p.clear();
-		
-		// Stand-ins
-		public static void clear_climate(Planet p) { }
 	}
 }
 

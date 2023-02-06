@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 using static Earthgen.Statics;
@@ -90,15 +91,25 @@ namespace Earthgen.planet.grid
 			return q*h*d;
 		}
 
-		public List<Vector2> polygon (Quaternion d) {
+		public Polygon polygon (Quaternion d) {
 			var t = this;
-			List<Vector2> p = new();
+			Polygon p = new();
 			Quaternion q = reference_rotation(t, d);
 			for (int i=0; i<edge_count(t); i++) {
 				Vector3 c = q * vector(nth_corner(t, i));
 				p.push_back(Vector2(c.x, c.y));
 			}
 			return p;
+		}
+
+		public class Polygon : List<Vector2>
+		{
+			public static Polygon operator *(Quaternion lhs, Polygon rhs)
+			{
+				var p = new Polygon();
+				p.AddRange(from v in rhs select (Vector2)(lhs * v));
+				return p;
+			}
 		}
 
 		private static Quaternion reference_rotation(Tile t, Quaternion d) => t.reference_rotation(d);
@@ -132,7 +143,7 @@ namespace Earthgen
 		public static Edge nth_edge (Tile t, int n) => t.nth_edge(n);
 
 		public static Quaternion reference_rotation(Tile t, Quaternion d) => t.reference_rotation(d);
-		public static List<Vector2> polygon(Tile t, Quaternion d) => t.polygon(d);
+		public static Tile.Polygon polygon(Tile t, Quaternion d) => t.polygon(d);
 	}
 
 }

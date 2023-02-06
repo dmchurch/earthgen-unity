@@ -26,12 +26,12 @@ namespace Earthgen.planet.terrain
 			tiles = new Terrain_tile[tile_count(p)];
 		}
 
-		public static RadianFloat latitude (Vector3 v) {
+		public static AngleFloat latitude (Vector3 v) {
 			return asin(v.z);
 		}
-		public static RadianFloat longitude (Vector3 v) {
+		public static AngleFloat longitude (Vector3 v) {
 			if (v.x == 0 && v.y == 0)
-				return 0;
+				return default;
 			return atan2(v.y, v.x);
 		}
 
@@ -43,16 +43,16 @@ namespace Earthgen.planet.terrain
 		public static void clear_terrain(this Planet p) => p.terrain.clear_terrain();
 		public static void init_terrain(this Planet p) => p.terrain.init_terrain(p);
 
-		public static RadianFloat latitude (this Planet p, Vector3 v) {
+		public static AngleFloat latitude (this Planet p, Vector3 v) {
 			return pi/2 - angle(axis(p), v);
 		}
 
-		public static RadianFloat longitude (this Planet p, Vector3 v) {
+		public static AngleFloat longitude (this Planet p, Vector3 v) {
 			Vector3 u = rotation_to_default(p) * v;
 			return Terrain.longitude(u);
 		}
 
-		public static RadianFloat north (this Planet p, Tile t) {
+		public static AngleFloat north (this Planet p, Tile t) {
 			Vector3 v = reference_rotation(t, rotation_to_default(p)) * vector(nth_tile(t, 0));
 			return pi-atan2(v.y, v.x);
 		}
@@ -60,7 +60,7 @@ namespace Earthgen.planet.terrain
 		public static double area (this Planet p, Tile t) {
 			double a = 0.0;
 			for (int k=0; k<edge_count(t); k++) {
-				double angle = acos(dot_product(normal(vector(t) - vector(nth_corner(t,k))), normal(vector(t) - vector(nth_corner(t,k+1)))));
+				AngleFloat angle = acos(dot_product(normal(vector(t) - vector(nth_corner(t,k))), normal(vector(t) - vector(nth_corner(t,k+1)))));
 				a += 0.5 * sin(angle) * distance(vector(t), vector(nth_corner(t,k))) * distance(vector(t), vector(nth_corner(t,k+1)));
 				/*
 				 *	double base = length(corner(t,k)->v - corner(t,k+1)->v);
@@ -75,13 +75,13 @@ namespace Earthgen.planet.terrain
 			return distance(vector(nth_corner(e,0)), vector(nth_corner(e,1))) * radius(p);
 		}
 
-		public static double angular_velocity (this Planet p) {
+		public static AngleFloat angular_velocity (this Planet p) {
 			/* currently locked at 24 hours */
 			return 2.0 * pi / (24 * 60 * 60);
 		}
 
-		public static double coriolis_coefficient (this Planet p, RadianFloat latitude) {
-			return 2.0 * angular_velocity(p) * sin(latitude);
+		public static double coriolis_coefficient (this Planet p, AngleFloat latitude) {
+			return 2.0 * angular_velocity(p).Radians * sin(latitude);
 		}
 
 		public static Quaternion rotation (this Planet p) {
@@ -101,8 +101,18 @@ namespace Earthgen
 		public static void clear_terrain(Planet p) => PlanetExtensions.clear_terrain(p);
 		public static void init_terrain(Planet p) => PlanetExtensions.init_terrain(p);
 
-		public static double latitude(Vector3 v) => Terrain.latitude(v);
-		public static double longitude(Vector3 v) => Terrain.longitude(v);
+		public static AngleFloat latitude(Vector3 v) => Terrain.latitude(v);
+		public static AngleFloat longitude(Vector3 v) => Terrain.longitude(v);
+
+		public static AngleFloat latitude (Planet p, Vector3 v) => PlanetExtensions.latitude(p, v);
+		public static AngleFloat longitude (Planet p, Vector3 v) => PlanetExtensions.longitude(p, v);
+		public static AngleFloat north (Planet p, Tile t) => PlanetExtensions.north(p, t);
+		public static float area (Planet p, Tile t) => (float)PlanetExtensions.area(p, t);
+		public static float length (Planet p, Edge e) => (float)PlanetExtensions.length(p, e);
+		public static AngleFloat angular_velocity (Planet p) => PlanetExtensions.angular_velocity(p);
+		public static double coriolis_coefficient (Planet p, AngleFloat latitude) => PlanetExtensions.coriolis_coefficient(p, latitude);
+		public static Quaternion rotation (Planet p) => PlanetExtensions.rotation(p);
+		public static Quaternion rotation_to_default (Planet p) => PlanetExtensions.rotation_to_default(p);
 
 		public static Vector3 default_axis() => Terrain.default_axis();
 

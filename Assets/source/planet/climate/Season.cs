@@ -1,14 +1,32 @@
-#include "season.h"
-#include "../planet.h"
+using System;
 
-const std::deque<Climate_tile>& tiles (const Season& s) {return s.tiles;}
-const std::deque<Climate_corner>& corners (const Season& s) {return s.corners;}
-const std::deque<Climate_edge>& edges (const Season& s) {return s.edges;}
+namespace Earthgen.planet.climate
+{
+    [Serializable]
+    public class Season
+    {
+        public Climate_tile[] tiles;
+        public Climate_corner[] corners;
+        public Climate_edge[] edges;
+    }
+}
 
-const Climate_tile& nth_tile (const Season& s, int n) {return s.tiles[n];}
-const Climate_corner& nth_corner (const Season& s, int n) {return s.corners[n];}
-const Climate_edge& nth_edge (const Season& s, int n) {return s.edges[n];}
+namespace Earthgen
+{
+    using planet.climate;
+    public static partial class Statics
+    {
+        public static Climate_tile[] tiles (Season s) => s.tiles;
+        public static Climate_corner[] corners (Season s) => s.corners;
+        public static Climate_edge[] edges (Season s) => s.edges;
 
-Climate_tile& m_tile (Season& s, int n) {return s.tiles[n];}
-Climate_corner& m_corner (Season& s, int n) {return s.corners[n];}
-Climate_edge& m_edge (Season& s, int n) {return s.edges[n];}
+        public static Climate_tile nth_tile (Season s, int n) => s.tiles[n];
+        public static Climate_corner nth_corner (Season s, int n) => s.corners[n];
+        public static Climate_edge nth_edge (Season s, int n) => s.edges[n];
+
+        public static ref Climate_tile m_tile (Season s, int n) => ref s.tiles[n];
+        public static ref Climate_corner m_corner (Season s, int n) => ref s.corners[n];
+        public static ref Climate_edge m_edge (Season s, int n) => ref s.edges[n];
+
+    }
+}
