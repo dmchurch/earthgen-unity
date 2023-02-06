@@ -4,17 +4,19 @@
 #include <algorithm>
 #include <iostream>
 
+using namespace std;
+
 void generate_climate (Planet& planet, const Climate_parameters& par) {
 	clear_climate(planet);
 	m_terrain(planet).var.axial_tilt = par.axial_tilt;
 	m_climate(planet).var.season_count = par.seasons;
-	std::cout << "seasons: ";
+	cout << "seasons: ";
 	for (int i=0; i<par.seasons; i++) {
-		std::cout << i << std::flush;
+		cout << i << flush;
 		generate_season(planet, par, (float)i/par.seasons);
-		std::cout << ", ";
+		cout << ", ";
 	}
-	std::cout << "done\n";
+	cout << "done\n";
 }
 
 void copy_season (const Climate_generation_season& from, Season& to) {
@@ -74,11 +76,11 @@ Vector2 _default_pressure_gradient_force (double tropical_equator, double latitu
 	double pressure_deviation = 20.0 / 15000;
 	if (latitude > tropical_equator) {
 		double c = 3.0 * pi / (pi / 2.0 - tropical_equator);
-		pressure_derivate = pressure_deviation * std::sin(c * (latitude - tropical_equator));
+		pressure_derivate = pressure_deviation * sin(c * (latitude - tropical_equator));
 	}
 	else {
 		double c = 3.0 * pi / (pi / 2.0 + tropical_equator);
-		pressure_derivate = pressure_deviation * std::sin(c * (latitude - tropical_equator));
+		pressure_derivate = pressure_deviation * sin(c * (latitude - tropical_equator));
 	}
 	if (latitude < tropical_equator + (pi/2.0 - tropical_equator)/3.0 && latitude > tropical_equator - (pi/2.0 + tropical_equator)/3.0) {
 		pressure_derivate = pressure_derivate / 3.0;
@@ -87,12 +89,12 @@ Vector2 _default_pressure_gradient_force (double tropical_equator, double latitu
 }
 
 Wind _prevailing_wind (Vector2 pressure_gradient_force, double coriolis_coefficient, double friction_coefficient) {
-	double angle_offset = std::atan2(coriolis_coefficient, friction_coefficient);
+	double angle_offset = atan2(coriolis_coefficient, friction_coefficient);
 	double speed = length(pressure_gradient_force) / length(Vector2(coriolis_coefficient, friction_coefficient));
 	Vector2 v = rotation_matrix(angle(pressure_gradient_force) - angle_offset) * Vector2(1.0, 0.0);
 	Wind w;
 	w.speed = speed;
-	w.direction = std::atan2(v.y, v.x);
+	w.direction = atan2(v.y, v.x);
 	return w;
 }
 
@@ -110,7 +112,7 @@ void _set_wind (const Planet& planet, const Climate_parameters&, Climate_generat
 	}
 	for (auto& t : tiles(planet)) {
 		//tile shape in 2d, rotated according to wind direction
-		std::vector<Vector2> corners =
+		vector<Vector2> corners =
 			rotation_matrix(north(planet, &t) - season.tiles[id(t)].wind.direction) * polygon(&t, rotation_to_default(planet));
 
 		int e = edge_count(t);
@@ -120,7 +122,7 @@ void _set_wind (const Planet& planet, const Climate_parameters&, Climate_generat
 			season.edges[id(nth_edge(t, k))].wind_velocity -=
 				0.5 * direction
 				* season.tiles[id(t)].wind.speed
-				* std::abs(corners[k].y - corners[(k+1)%e].y)
+				* abs(corners[k].y - corners[(k+1)%e].y)
 				/ length(corners[k] - corners[(k+1)%e]);
 		}
 	}
@@ -139,7 +141,7 @@ float _incoming_wind (const Planet& planet, const Climate_generation_season& sea
 	for (auto& e : edges(t)) {
 		if (sign(e, t) * season.edges[id(e)].wind_velocity > 0) {
 			sum +=
-				std::abs(season.edges[id(e)].wind_velocity)
+				abs(season.edges[id(e)].wind_velocity)
 				* length(planet, e);
 		}
 	}
@@ -152,7 +154,7 @@ float _outgoing_wind (const Planet& planet, const Climate_generation_season& sea
 	for (auto& e : edges(t)) {
 		if (sign(e, t) * season.edges[id(e)].wind_velocity < 0) {
 			sum +=
-				std::abs(season.edges[id(e)].wind_velocity)
+				abs(season.edges[id(e)].wind_velocity)
 				* length(planet, e);
 		}
 	}
@@ -167,7 +169,7 @@ float _incoming_humidity (const Planet& planet, const Climate_generation_season&
 		if (sign(e, t) * season.edges[id(e)].wind_velocity > 0) {
 			humidity +=
 				season.tiles[id(nth_tile(t, k))].humidity
-				* std::abs(season.edges[id(e)].wind_velocity)
+				* abs(season.edges[id(e)].wind_velocity)
 				* length(planet, e);
 		}
 	}
@@ -184,14 +186,14 @@ float _humidity_change (float first, float second) {
 }
 
 void _iterate_humidity (const Planet& planet, const Climate_parameters& par, Climate_generation_season& season) {
-	std::deque<float> humidity;
-	std::deque<float> precipitation;
+	deque<float> humidity;
+	deque<float> precipitation;
 	humidity.resize(tile_count(planet));
 	precipitation.resize(tile_count(planet));
 	
 	float delta = 1.0;
 	while (delta > par.error_tolerance) {
-//		std::cout << "delta: " << delta << "\n";
+//		cout << "delta: " << delta << "\n";
 		for (int i=0; i<tile_count(planet); i++) {
 			precipitation[i] = 0.0;
 			if (is_land(nth_tile(terrain(planet), i))) {
@@ -208,7 +210,7 @@ void _iterate_humidity (const Planet& planet, const Climate_parameters& par, Cli
 						incoming_humidity / incoming_wind;
 					float saturation = saturation_humidity(season.tiles[i].temperature);
 					// limit to saturation humidity
-					humidity[i] = std::min(saturation, density);
+					humidity[i] = min(saturation, density);
 					if (saturation < density)
 						precipitation[i] += (density - saturation) * incoming_wind;
 					// increase humidity when outgoing wind is less than incoming
@@ -216,7 +218,7 @@ void _iterate_humidity (const Planet& planet, const Climate_parameters& par, Cli
 						float convective = humidity[i] * (-convection / incoming_wind);
 						if (humidity[i] + convective > saturation)
 							precipitation[i] += (humidity[i] + convective - saturation) * (-convection);
-						humidity[i] = std::min(saturation, humidity[i] + convective);
+						humidity[i] = min(saturation, humidity[i] + convective);
 					}
 				}
 				// scale by constant and area
@@ -227,7 +229,7 @@ void _iterate_humidity (const Planet& planet, const Climate_parameters& par, Cli
 		}
 		float largest_change = 0.0;
 		for (int i=0; i<tile_count(planet); i++) {
-			largest_change = std::max(largest_change, _humidity_change(season.tiles[i].humidity, humidity[i]));
+			largest_change = max(largest_change, _humidity_change(season.tiles[i].humidity, humidity[i]));
 		}
 		delta = largest_change;
 		for (int i=0; i<tile_count(planet); i++) {
@@ -257,7 +259,7 @@ void _set_river_flow (const Planet&, const Climate_parameters&, Climate_generati
 	for (auto& t : tiles(planet)) {
 		lowest_corner(t).river_flow_increase += t.precipitation;
 	}
-	std::multimap<int, const Corner*> river_sources;
+	multimap<int, const Corner*> river_sources;
 	for c : corners {
 		if distance_to_sea(c) > 0
 			river_sources.insert(-distance_to_sea(c), c);
