@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ using static Earthgen.Statics;
 
 namespace Earthgen.planet.grid
 {
-	public class Tile
+	public class Tile : IComparable<Tile>
 	{
 		public readonly int id;
 		public readonly int edge_count;
@@ -102,6 +103,7 @@ namespace Earthgen.planet.grid
 
 		private static Quaternion reference_rotation(Tile t, Quaternion d) => t.reference_rotation(d);
 		private static Corner nth_corner(Tile t, int i) => t.nth_corner(i);
+		public int CompareTo(Tile other) => id.CompareTo(other.id);
 	}
 }
 

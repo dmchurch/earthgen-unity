@@ -1,6 +1,8 @@
 using System;
 
 using Earthgen.planet.grid;
+using Earthgen.planet.terrain;
+
 using static Earthgen.Statics;
 
 namespace Earthgen.planet
@@ -28,7 +30,6 @@ namespace Earthgen.planet
 	}
 
 	// Stand-ins
-	public class Terrain { };
 	public class Climate { };
 }
 
@@ -40,7 +41,6 @@ namespace Earthgen
 		public static void clear(Planet p) => p.clear();
 		
 		// Stand-ins
-		public static void clear_terrain(Planet p) { }
 		public static void clear_climate(Planet p) { }
 	}
 }

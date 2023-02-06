@@ -56,8 +56,22 @@ namespace Earthgen.planet.grid
 
 namespace Earthgen
 {
+	using Earthgen.planet;
+	using Earthgen.planet.grid;
 	public static partial class Statics
 	{
-		public static void set_grid_size(planet.Planet p, int size) => planet.grid.PlanetExtensions.set_grid_size(p, size);
+		public static void set_grid_size(planet.Planet p, int size) => PlanetExtensions.set_grid_size(p, size);
+
+		public static Tile[] tiles (Planet p) => PlanetExtensions.tiles(p);
+		public static Corner[] corners (Planet p) => PlanetExtensions.corners(p);
+		public static Edge[] edges (Planet p) => PlanetExtensions.edges(p);
+
+		public static Tile nth_tile (Planet p, int n) => PlanetExtensions.nth_tile(p, n);
+		public static Corner nth_corner (Planet p, int n) => PlanetExtensions.nth_corner(p, n);
+		public static Edge nth_edge (Planet p, int n) => PlanetExtensions.nth_edge(p, n);
+
+		public static int tile_count (Planet p) => PlanetExtensions.tile_count(p);
+		public static int corner_count (Planet p) => PlanetExtensions.corner_count(p);
+		public static int edge_count (Planet p) => PlanetExtensions.edge_count(p);
 	}
 }
