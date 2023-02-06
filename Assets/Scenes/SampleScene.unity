@@ -335,12 +335,25 @@ MonoBehaviour:
     axis: {x: 0, y: 0, z: 1}
     seed: 
     iterations: 1000
-    water_ratio: 0.65
+    waterPercentage: 65
   climateParameters:
     seasons: 2
     axialTiltInDegrees: 22.918312
     error_tolerance: 0.01
+  meshParameters:
+    modelTopography: 1
+    elevationScale: 1
+  textureParameters:
+    timeOfYear: 0
+  autoGenerate: 0
+  autoRender: 0
+  seedSource: 0
+  terrainDirty: 0
+  climateDirty: 0
+  meshDirty: 0
+  textureDirty: 0
   saveGeneratedData: 0
+  saveRenderedObjects: 0
 --- !u!4 &1708539391
 Transform:
   m_ObjectHideFlags: 0

@@ -13,7 +13,7 @@ namespace Earthgen.planet.terrain
 			grid_size = 6,
 			axis = Terrain.default_axis(),
 			iterations = 1000,
-			water_ratio = 0.65f,
+			waterPercentage = 65,
 		};
 
 		[Range(0,10)]
@@ -21,8 +21,13 @@ namespace Earthgen.planet.terrain
 		public Vector3 axis;
 		public string seed;
 		public int iterations;
-		[Range(0,1)]
-		public float water_ratio;
+		[Range(0,100)]
+		public float waterPercentage;
+		public float water_ratio
+		{
+			get => waterPercentage / 100;
+			set => waterPercentage = value * 100;
+		}
 
 		public void set_default() => this = Default;
 		public void correct_values()

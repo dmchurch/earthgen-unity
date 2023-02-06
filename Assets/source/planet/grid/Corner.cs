@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 
 namespace Earthgen.planet.grid
 {
-	public class Corner
+	public class Corner : IComparable<Corner>
 	{
 		public readonly int id;
 		public Vector3 v;
@@ -57,6 +58,8 @@ namespace Earthgen.planet.grid
 				i%3;
 			return c.edges[k];
 		}
+
+		public int CompareTo(Corner other) => id.CompareTo(other.id);
 	}
 }
 

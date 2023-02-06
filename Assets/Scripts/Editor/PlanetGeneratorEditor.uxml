@@ -1,12 +1,42 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
     <Style src="project://database/Assets/Scripts/Editor/PlanetGeneratorEditor.uss?fileID=7433441132597879392&amp;guid=dd2c3e02727f384419ea976d93de1bae&amp;type=3#PlanetGeneratorEditor" />
-    <uie:PropertyField label="Terrain Generation Parameters" binding-path="terrainParameters" name="terrainParameters" />
-    <uie:PropertyField label="Climate Generation Parameters" binding-path="climateParameters" name="climateParameters" />
-    <ui:Toggle name="AutoRegenerate" text="Automatically regenerate data?" tooltip="If checked, the PlanetGenerator will generate new data whenever the input parameters change." />
-    <ui:HelpBox name="saveDataWarning" message-type="Info" text="All generated planet data will be saved in the asset tree. This will increase the size of your Scene file." style="display: none;" />
-    <ui:Button text="Generate Terrain" display-tooltip-when-elided="true" name="Generate_Terrain" />
+    <ui:Foldout text="&lt;b&gt;Generation Settings&lt;/b&gt;" name="Generation_Settings">
+        <ui:Foldout text="Terrain Generation Parameters" name="terrainParameters">
+            <ui:SliderInt picking-mode="Ignore" label="Grid Size" show-input-field="true" binding-path="terrainParameters.grid_size" name="grid_size" />
+            <uie:Vector3Field label="Planet Axis (Z-up)" binding-path="terrainParameters.axis" name="axis" />
+            <uie:EnumField label="Seed From" binding-path="seedSource" name="seedSource" />
+            <ui:TextField picking-mode="Ignore" label="Generation Seed" binding-path="terrainParameters.seed" tooltip="Only used for elevation generation" name="seed" />
+            <uie:IntegerField label="Topology Iterations" binding-path="terrainParameters.iterations" name="iterations" />
+            <ui:Slider picking-mode="Ignore" label="Water Percentage" show-input-field="true" direction="Horizontal" name="waterPercentage" binding-path="terrainParameters.waterPercentage" high-value="100" />
+        </ui:Foldout>
+        <ui:Foldout text="Climate Generation Parameters" name="climateParameters">
+            <uie:IntegerField label="Seasons" binding-path="climateParameters.seasons" name="seasons" />
+            <ui:Slider picking-mode="Ignore" label="Axial Tilt in Degrees" high-value="90" binding-path="climateParameters.axialTiltInDegrees" name="axialTiltInDegrees" show-input-field="true" />
+            <ui:Slider picking-mode="Ignore" label="Error Tolerance" high-value="1" binding-path="climateParameters.error_tolerance" name="error_tolerance" low-value="0.001" show-input-field="true" />
+        </ui:Foldout>
+        <ui:Toggle name="AutoRegenerate" tooltip="If checked, the PlanetGenerator will generate new data whenever the input parameters change." binding-path="autoGenerate" label="Automatically regenerate data?" />
+    </ui:Foldout>
+    <ui:Button text="Generate Terrain" name="Generate_Terrain" display-tooltip-when-elided="true" />
     <ui:Button text="Generate Climate" display-tooltip-when-elided="true" name="Generate_Climate" />
-    <uie:PropertyField label="Save Generated Data?" binding-path="saveGeneratedData" name="saveGeneratedData" />
+    <ui:Toggle label="Save Generated Data?" name="saveGeneratedData" binding-path="saveGeneratedData" />
+    <ui:HelpBox name="saveDataWarning" message-type="Info" text="All generated planet data will be saved in the asset tree. This will increase the size of your Scene file or asset." style="display: none;" />
+    <ui:GroupBox />
+    <ui:Foldout text="&lt;b&gt;Rendering Settings&lt;/b&gt;" name="Rendering_Settings">
+        <ui:Foldout text="Mesh Rendering Options" name="meshParameters">
+            <ui:Toggle label="Model Topography" binding-path="meshParameters.modelTopography" name="modelTopography" tooltip="When unchecked, all planets will share the same mesh" />
+            <ui:Slider picking-mode="Ignore" label="Elevation Scale" high-value="10000" low-value="1" binding-path="meshParameters.elevationScale" show-input-field="true" name="elevationScale" tooltip="Planet topography will be exaggerated when this is &gt; 1, requires &quot;Model Topography&quot; to be enabled" />
+        </ui:Foldout>
+        <ui:Foldout text="Texture Rendering Options" name="textureParameters">
+            <uie:EnumField label="Color Scheme" name="colorScheme" />
+            <ui:Slider picking-mode="Ignore" label="Time of Year" high-value="1" low-value="0" binding-path="textureParameters.timeOfYear" show-input-field="true" name="timeOfYear" />
+        </ui:Foldout>
+        <ui:Toggle tooltip="When checked, render data will automatically be updated whenever parameters or options change" name="AutoRender" label="Automatically render planet?" binding-path="autoRender" />
+    </ui:Foldout>
+    <ui:Button text="Generate Meshes" name="Generate_Meshes" display-tooltip-when-elided="true" />
+    <ui:Button text="Generate Textures" display-tooltip-when-elided="true" name="Generate_Textures" />
+    <ui:Toggle label="Save Rendered Objects?" binding-path="saveRenderedObjects" name="saveRenderedObjects" />
+    <ui:HelpBox name="saveObjectsWarning" message-type="Warning" text="All meshes and textures will be saved in full to the asset tree! This will greatly increase the size of your Scene file or asset and is probably unnecessary." style="display: none;" />
+    <ui:GroupBox />
     <ui:Toggle text="Show Default Inspector" name="DefaultInspectorToggle" />
-    <ui:HelpBox name="Default_Inspector" message-type="None" style="flex-direction: column; align-items: stretch; padding-left: 20px; padding-right: 8px; padding-top: 0;" />
+    <ui:HelpBox name="Default_Inspector" message-type="None" show-input-field="true" style="flex-direction: column; align-items: stretch; padding-left: 20px; padding-right: 8px; padding-top: 0;" />
 </ui:UXML>
