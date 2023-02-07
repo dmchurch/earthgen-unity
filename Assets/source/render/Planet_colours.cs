@@ -2,7 +2,7 @@
 #include "../planet/planet.h"
 
 void clear_colours (Planet_colours& c) {
-	std::deque<Colour>().swap(c.tiles);
+	deque<Colour>().swap(c.tiles);
 }
 
 void init_colours (Planet_colours& c, const Planet& p) {
@@ -63,7 +63,7 @@ void colour_topography (Planet_colours& c, const Planet& p) {
 			c.tiles[id(t)] = land[5];
 			for (int i=0; i<5; i++) {
 				if (elev <= land_limits[i+1]) {
-					double d = std::max(0.0, std::min(1.0, (elev - land_limits[i]) / (land_limits[i+1] - land_limits[i])));
+					double d = max(0.0, min(1.0, (elev - land_limits[i]) / (land_limits[i+1] - land_limits[i])));
 					c.tiles[id(t)] = interpolate(land[i], land[i+1], d);
 					break;
 				}
@@ -82,7 +82,7 @@ void colour_vegetation (Planet_colours& c, const Planet& p, const Season& s) {
 
 	for (const Tile& t : tiles(p)) {
 		if (is_water(nth_tile(terrain(p) ,id(t)))) {
-			double d = std::min(1.0f, water_depth(nth_tile(terrain(p), id(t)))/400);
+			double d = min(1.0f, water_depth(nth_tile(terrain(p), id(t)))/400);
 			c.tiles[id(t)] = interpolate(water_shallow, water_deep, d);
 		}
 		else {
@@ -90,9 +90,9 @@ void colour_vegetation (Planet_colours& c, const Planet& p, const Season& s) {
 			if (temperature(climate) <= freezing_point())
 				c.tiles[id(t)] = snow;
 			else {
-				double d = std::min(1.0, (elevation(nth_tile(terrain(p), id(t))) - sea_level(p))/2500);
+				double d = min(1.0, (elevation(nth_tile(terrain(p), id(t))) - sea_level(p))/2500);
 				Colour ground = interpolate(land_low, land_high, d);
-				double v = std::min(1.0f, aridity(climate)/1.5f);
+				double v = min(1.0f, aridity(climate)/1.5f);
 				c.tiles[id(t)] = interpolate(vegetation, ground, v);
 			}
 		}
@@ -148,7 +148,7 @@ void colour_aridity (Planet_colours& c, const Planet& p, const Season& s) {
 			c.tiles[id(t)] = col[3];
 			for (int i=1; i<4; i++) {
 				if (ar > limits[i]) {
-					double d = std::min(1.0f, (ar - limits[i]) / (limits[i-1] - limits[i]));
+					double d = min(1.0f, (ar - limits[i]) / (limits[i-1] - limits[i]));
 					c.tiles[id(t)] = interpolate(col[i], col[i-1], d);
 					break;
 				}
@@ -199,7 +199,7 @@ void colour_precipitation (Planet_colours& c, const Planet& p, const Season& s) 
 				c.tiles[id(t)] = interpolate(dry, medium, d);
 			}
 			else {
-				double d = std::min(1.0, (prec - low) / (high - low));
+				double d = min(1.0, (prec - low) / (high - low));
 				c.tiles[id(t)] = interpolate(medium, wet, d);
 			}
 		}
