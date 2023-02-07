@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using static Earthgen.Statics;
 
 namespace Earthgen.planet.grid
@@ -10,15 +11,16 @@ namespace Earthgen.planet.grid
 		public readonly Corner[] corners;
 		public readonly Edge[] edges;
 
-		public Grid(int s)
+		public Grid(int s, HashSet<int> pentileIds = null)
 		{
+			pentileIds ??= Enumerable.Range(0, 12).ToHashSet();
 			size = s;
 			var tiles = new List<Tile>(tile_count(size));
 			var corners = new List<Corner>(corner_count(size));
 			var edges = new List<Edge>(edge_count(size));
 
 			for (int i=0; i<tile_count(size); i++)
-				tiles.push_back(Tile(i, i<12 ? 5 : 6));
+				tiles.push_back(Tile(i, pentileIds.Contains(i) ? 5 : 6));
 			for (int i=0; i<corner_count(size); i++)
 				corners.push_back(Corner(i));
 			for (int i=0; i<edge_count(size); i++)
@@ -28,6 +30,9 @@ namespace Earthgen.planet.grid
 			this.corners = corners.ToArray();
 			this.edges = edges.ToArray();
 		}
+
+		public IEnumerable<int> Pentiles => from t in tiles where t.edge_count == 5 select t.id;
+		public IEnumerable<int> Hextiles => from t in tiles where t.edge_count == 6 select t.id;
 
 		public static int tile_count (int size) {return 10*pow(3,size)+2;}
 		public static int corner_count (int size) {return 20*pow(3,size);}

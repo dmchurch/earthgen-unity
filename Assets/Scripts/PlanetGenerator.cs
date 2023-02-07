@@ -87,6 +87,9 @@ namespace Earthgen.unity
             if (autoRender && textureDirty) {
                 GenerateTextures();
             }
+            if (autoRender && !meshDirty && !textureDirty) {
+                InstantiateRenderers();
+            }
         }
 
         public static string RandomSeed()
@@ -124,6 +127,46 @@ namespace Earthgen.unity
             meshDirty = true;
         }
 
+        public void InstantiateRenderers()
+        {
+            var renderers = GetComponentsInChildren<MeshRenderer>();
+            var meshes = Render.meshes;
+            int rendererCount = renderers.Length;
+            var materials = textureParameters.materials;
+
+            if (rendererCount < meshes.Length) {
+                Array.Resize(ref renderers, meshes.Length);
+                for (; rendererCount < meshes.Length; rendererCount++) {
+                    var child = new GameObject(
+                        $"{gameObject.name} [Renderer {rendererCount}]",
+                        new[] { typeof(MeshRenderer), typeof(MeshFilter) });
+                    child.transform.parent = transform;
+                    renderers[rendererCount] = child.GetComponent<MeshRenderer>();
+                }
+            } else {
+                for (; rendererCount > meshes.Length; rendererCount--) {
+                    if (Application.isPlaying) {
+                        Destroy(renderers[rendererCount - 1].gameObject);
+                    } else {
+                        DestroyImmediate(renderers[rendererCount - 1].gameObject);
+                    }
+                }
+                Array.Resize(ref renderers, meshes.Length);
+            }
+
+            for (int i = 0; i < rendererCount; i++) {
+                var renderer = renderers[i];
+                var filter = renderer.GetComponent<MeshFilter>();
+                if (meshes.Length > i) {
+                    filter.sharedMesh = meshes[i];
+                }
+                renderer.sharedMaterials = materials;
+                renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                renderer.gameObject.name = $"{gameObject.name} [Renderer{(rendererCount == 1 ? "" : " "+i)}]";
+                renderer.gameObject.hideFlags = HideFlags.NotEditable | HideFlags.DontSave;
+            }
+        } 
+
         public static string DescribeParameters(Terrain_parameters par)
         {
             return $"grid size {par.grid_size}, seed \"{par.seed}\", iterations {par.iterations}";
@@ -142,15 +185,18 @@ namespace Earthgen.unity
         public void GenerateMeshes()
         {
             Debug.Log($"Generating Meshes");
+            Render.RenderMeshes(meshParameters, gameObject.name);
             meshDirty = false;
-            throw new NotImplementedException();
         }
 
         public void GenerateTextures()
         {
             Debug.Log($"Generating Textures");
+            Render.RenderTextures(textureParameters, gameObject.name);
+            if (textureParameters.materials.Length > 0) {
+                textureParameters.materials[0].mainTexture = null; //Render.tileTexture;
+            }
             textureDirty = false;
-            throw new NotImplementedException();
         }
 
     }

@@ -9,6 +9,9 @@ namespace Earthgen.unity
         public static TextureParameters Default = new()
         {
         };
+
+        public Material[] materials;
+
         [Range(0, 1)]
         public float timeOfYear;
     }

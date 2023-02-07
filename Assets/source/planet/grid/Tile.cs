@@ -25,6 +25,17 @@ namespace Earthgen.planet.grid
 			edges = new Edge[edge_count];
 		}
 
+		public Tile Clone(int? newId = null)
+		{
+			var newTile = new Tile(newId ?? id, edge_count);
+			newTile.v = v;
+			v = Vector3(-10,-10,-10); // poison this value, REMOVE THIS LINE LATER
+			Array.Copy(tiles, newTile.tiles, edge_count);
+			Array.Copy(corners, newTile.corners, edge_count);
+			Array.Copy(edges, newTile.edges, edge_count);
+			return newTile;
+		}
+
 		public int position (Tile n) {
 			var t = this;
 			for (int i=0; i<t.edge_count; i++)

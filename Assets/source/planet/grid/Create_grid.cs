@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 using static Earthgen.Statics;
@@ -70,11 +73,14 @@ namespace Earthgen.planet.grid
 					}
 				}
 			}
+
+			_reorder_tiles(grid);
+	
 			return grid;
 		}
 
 		static Grid _subdivided_grid (Grid prev) {
-			Grid grid = new Grid(prev.size + 1);
+			Grid grid = new Grid(prev.size + 1, prev.Pentiles.Take(12).ToHashSet());
 
 			int prev_tile_count = prev.tiles.size();
 			int prev_corner_count = prev.corners.size();
@@ -119,8 +125,112 @@ namespace Earthgen.planet.grid
 					}
 				}
 			}
+
+			_reorder_tiles(grid);
 	
 			return grid;
+		}
+
+		static void _reorder_tiles(Grid grid)
+		{
+			// Order the grid tiles in such a way as to make it easy to break the tiles down into smaller
+			// and smaller contiguous regions, for rendering purposes. To do so, take an arbitrary tile and
+			// add neighbors in a breadth-first search until the set has at least half the tiles available.
+			// Then repeat, choosing to subdivide the largest segment starting from an edge (defined as: one
+			// of the tiles with the fewest neighbors among the active set). Repeat until all segments have been
+			// subdivided to size 1.
+
+			Queue<ArraySegment<Tile>> segments = new();
+			segments.Enqueue(new(grid.tiles));
+
+			while (segments.TryDequeue(out var segment)) {
+				if (segment.Count <= 2) {
+					// 1 or 2 tiles are already properly split, just ignore and discard this segment
+					continue;
+				}
+				HashSet<Tile> tiles = segment.ToHashSet();
+				Tile startingTile = bestStartingTile(tiles);
+				Queue<Tile> tilesToAdd = new();
+				tilesToAdd.Enqueue(startingTile);
+
+				int idx = 0;
+				int limit = (segment.Count + 1) / 2; // put this many tiles in the first half-segment
+
+				while (idx < limit) {
+					if (tilesToAdd.Count == 0) {
+						//Debug.LogWarning("No tiles in add queue, but still tiles in segment??");
+						// This happens sometimes, but it doesn't really hurt anything.
+						// Add another tile to continue the division from those remaining
+						tilesToAdd.Enqueue(bestStartingTile(tiles));
+					}
+					var tile = tilesToAdd.Dequeue();
+					if (!tiles.Contains(tile)) continue;
+					tiles.Remove(tile);
+					segment[idx++] = tile;
+					foreach (var neighbor in tile.tiles) {
+						tilesToAdd.Enqueue(neighbor);
+					}
+				}
+				foreach (var tile in tiles) {
+					segment[idx++] = tile;
+				}
+				segments.Enqueue(segment.Slice(0, limit));
+				segments.Enqueue(segment.Slice(limit));
+			}
+			// Once all the segments are gone, grid.tiles is now in proper order (but the ids are not).
+
+			// Now we have to fix all the tiles, which is tricky because of all the crosslinks; we have
+			// to make each Tile, Corner, and Edge anew and then fix all the links
+			Dictionary<Tile, Tile> tileMapping = new();
+			Dictionary<Corner, Corner> cornerMapping = new();
+			Dictionary<Edge, Edge> edgeMapping = new();
+			int id = 0;
+			foreach(var tile in grid.tiles) {
+				tileMapping[tile] = grid.tiles[id] = tile.Clone(id);
+				id++;
+			}
+			foreach (var corner in grid.corners) {
+				cornerMapping[corner] = grid.corners[corner.id] = corner.Clone();
+			}
+			foreach (var edge in grid.edges) {
+				edgeMapping[edge] = grid.edges[edge.id] = edge.Clone();
+			}
+
+			foreach (var tile in grid.tiles) {
+				for (int i = 0; i < tile.edge_count; i++) {
+					tile.tiles[i] = tileMapping[tile.tiles[i]];
+					tile.corners[i] = cornerMapping[tile.corners[i]];
+					tile.edges[i] = edgeMapping[tile.edges[i]];
+				}
+			}
+			foreach (var corner in grid.corners) {
+				for (int i = 0; i < 3; i++) {
+					corner.tiles[i] = tileMapping[corner.tiles[i]];
+					corner.corners[i] = cornerMapping[corner.corners[i]];
+					corner.edges[i] = edgeMapping[corner.edges[i]];
+				}
+			}
+			foreach (var edge in grid.edges) {
+				for (int i = 0; i < 2; i++) {
+					edge.tiles[i] = tileMapping[edge.tiles[i]];
+					edge.corners[i] = cornerMapping[edge.corners[i]];
+				}
+			}
+
+			static Tile bestStartingTile(HashSet<Tile> tiles)
+			{
+				int minActiveNeighbors = 7;
+				Tile startingTile = null;
+				foreach (var t in tiles) {
+					int activeNeighbors = (from neighbor in t.tiles where tiles.Contains(neighbor) select 1).Count();
+					if (activeNeighbors < minActiveNeighbors) {
+						minActiveNeighbors = activeNeighbors;
+						startingTile = t;
+					}
+				}
+
+				return startingTile;
+			}
 		}
 
 		static void _add_corner (int id, Grid grid, int t1, int t2, int t3) {

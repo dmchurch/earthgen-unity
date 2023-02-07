@@ -1,3 +1,4 @@
+using Earthgen.planet.grid;
 using Earthgen.planet.terrain;
 using System;
 using System.Collections;
@@ -22,6 +23,7 @@ namespace Earthgen.unity
         private Button GenerateTextures;
         private TextField seedField;
         private Slider elevationScale;
+        private SliderInt tilesPerRenderer;
 
         private PlanetGenerator generator => serializedObject.targetObject as PlanetGenerator;
 
@@ -77,18 +79,23 @@ namespace Earthgen.unity
             myInspector.Q("modelTopography").RegisterCallback<ChangeEvent<bool>>((_) => CheckRegenerate(generator.meshDirty = true));
             elevationScale = myInspector.Q<Slider>("elevationScale");
             elevationScale.RegisterCallback<ChangeEvent<float>>((_) => CheckRegenerate(generator.meshDirty |= generator.meshParameters.modelTopography));
+            tilesPerRenderer = myInspector.Q<SliderInt>("tilesPerRenderer");
+            tilesPerRenderer.RegisterCallback<ChangeEvent<int>>((evt) => CheckRegenerate(generator.meshDirty = true));
 
+            myInspector.Q("materials").RegisterCallback<SerializedPropertyChangeEvent>((_) => CheckRegenerate(generator.textureDirty = true));
             myInspector.Q("colorScheme").RegisterCallback<ChangeEvent<Enum>>((_) => CheckRegenerate(generator.textureDirty = true));
             myInspector.Q("timeOfYear").RegisterCallback<ChangeEvent<float>>((_) => CheckRegenerate(generator.textureDirty |= true));
 
             myInspector.Q<Foldout>("Generation_Settings").value = generator.terrainDirty || generator.climateDirty;
             
-            CheckRegenerate();
+            CheckRegenerate(0);
 
             return myInspector;
         }
 
-        private void CheckRegenerate(bool _ = false)
+        // convenience discard
+        private void CheckRegenerate<T>(T _) => CheckRegenerate();
+        private void CheckRegenerate()
         {
             //Debug.Log($"Checking regenerate, terrainDirty={generator.terrainDirty}, climateDirty={generator.climateDirty}");
             generator.AutoRender();
@@ -98,6 +105,13 @@ namespace Earthgen.unity
             GenerateClimate.SetEnabled(generator.climateDirty);
             GenerateMeshes.SetEnabled(generator.meshDirty);
             GenerateTextures.SetEnabled(generator.textureDirty);
+            //Debug.Log($"tpr {tilesPerRenderer.value} / {tilesPerRenderer.highValue}, tc {generator.Data.planet.tile_count()}");
+            bool isMax = tilesPerRenderer.value == tilesPerRenderer.highValue;
+            tilesPerRenderer.highValue = Math.Max(Math.Min(generator.Data.planet.tile_count(), 65536 / 7), tilesPerRenderer.value);
+            if (isMax) {
+                generator.meshParameters.tilesPerRenderer = tilesPerRenderer.highValue;
+                tilesPerRenderer.value = tilesPerRenderer.highValue;
+            }
         }
 
         private void showElement(VisualElement elem, bool newValue) => elem.style.display = newValue ? StyleKeyword.Initial : StyleKeyword.None;

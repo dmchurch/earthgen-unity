@@ -19,6 +19,17 @@ namespace Earthgen.planet.grid
 			edges = new Edge[3];
 		}
 
+		public Corner Clone(int? newId = null)
+		{
+			var newCorner = new Corner(newId ?? id);
+			newCorner.v = v;
+			v = new Vector3(-10,-10,-10); // poison this value, REMOVE THIS LINE LATER
+			Array.Copy(tiles, newCorner.tiles, tiles.Length);
+			Array.Copy(corners, newCorner.corners, corners.Length);
+			Array.Copy(edges, newCorner.edges, edges.Length);
+			return newCorner;
+		}
+
 		public int position (Tile t) {
 			var c = this;
 			for (int i=0; i<3; i++)

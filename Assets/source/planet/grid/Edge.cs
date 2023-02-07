@@ -1,3 +1,5 @@
+using System;
+
 namespace Earthgen.planet.grid
 {
 	public class Edge
@@ -11,6 +13,14 @@ namespace Earthgen.planet.grid
 			this.id = id;
 			tiles = new Tile[2];
 			corners = new Corner[2];
+		}
+
+		public Edge Clone(int? newId = null)
+		{
+			var newEdge = new Edge(newId ?? id);
+			Array.Copy(tiles, newEdge.tiles, tiles.Length);
+			Array.Copy(corners, newEdge.corners, corners.Length);
+			return newEdge;
 		}
 
 		public int position (Tile t) {

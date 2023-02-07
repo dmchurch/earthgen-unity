@@ -333,7 +333,7 @@ MonoBehaviour:
   terrainParameters:
     grid_size: 3
     axis: {x: 0, y: 0, z: 1}
-    seed: 
+    seed: Oqureyav
     iterations: 1000
     waterPercentage: 65
   climateParameters:
@@ -342,16 +342,19 @@ MonoBehaviour:
     error_tolerance: 0.01
   meshParameters:
     modelTopography: 1
-    elevationScale: 1
+    elevationScale: 7175
+    tilesPerRenderer: 12
   textureParameters:
+    materials:
+    - {fileID: 2100000, guid: b92c2308e48ea3c4a8d28de76eb99b2b, type: 2}
     timeOfYear: 0
   autoGenerate: 0
   autoRender: 0
   seedSource: 0
-  terrainDirty: 0
-  climateDirty: 0
-  meshDirty: 0
-  textureDirty: 0
+  terrainDirty: 1
+  climateDirty: 1
+  meshDirty: 1
+  textureDirty: 1
   saveGeneratedData: 0
   saveRenderedObjects: 0
 --- !u!4 &1708539391

@@ -40,6 +40,13 @@ namespace Earthgen.planet.terrain
 		public static Vector3 default_axis () => Vector3(0,0,1);
 	}
 
+	public static class GridExtensions
+	{
+		public static Terrain_tile terrain(this Tile t, Planet p) => p.terrain.tiles[t.id];
+		public static Terrain_corner terrain(this Corner c, Planet p) => p.terrain.corners[c.id];
+		public static Terrain_edge terrain(this Edge e, Planet p) => p.terrain.edges[e.id];
+	}
+
 	public static partial class PlanetExtensions
 	{
 		public static void clear_terrain(this Planet p) => p.terrain.clear_terrain();
@@ -59,18 +66,21 @@ namespace Earthgen.planet.terrain
 			return pi-atan2(v.y, v.x);
 		}
 
-		public static double area (this Planet p, Tile t) {
-			double a = 0.0;
+		public static float unit_area (this Planet p, Tile t) {
+			float a = 0.0f;
 			for (int k=0; k<edge_count(t); k++) {
 				AngleFloat angle = acos(dot_product(normal(vector(t) - vector(nth_corner(t,k))), normal(vector(t) - vector(nth_corner(t,k+1)))));
-				a += 0.5 * sin(angle) * distance(vector(t), vector(nth_corner(t,k))) * distance(vector(t), vector(nth_corner(t,k+1)));
+				a += 0.5f * sin(angle) * distance(vector(t), vector(nth_corner(t,k))) * distance(vector(t), vector(nth_corner(t,k+1)));
 				/*
 				 *	double base = length(corner(t,k)->v - corner(t,k+1)->v);
 				 *	double height = length(((corner(t,k)->v + corner(t,k+1)->v) * 0.5) - t->v);
 				 *	a += 0.5 * base * height;
 				 */
 			}
-			return a * pow(radius(p), 2.0);
+			return a;
+		}
+		public static double area (this Planet p, Tile t) {
+			return unit_area(p, t) * pow(radius(p), 2.0);
 		}
 
 		public static double length (this Planet p, Edge e) {

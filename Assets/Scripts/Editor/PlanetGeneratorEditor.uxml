@@ -25,8 +25,10 @@
         <ui:Foldout text="Mesh Rendering Options" name="meshParameters">
             <ui:Toggle label="Model Topography" binding-path="meshParameters.modelTopography" name="modelTopography" tooltip="When unchecked, all planets will share the same mesh" />
             <ui:Slider picking-mode="Ignore" label="Elevation Scale" high-value="10000" low-value="1" binding-path="meshParameters.elevationScale" show-input-field="true" name="elevationScale" tooltip="Planet topography will be exaggerated when this is &gt; 1, requires &quot;Model Topography&quot; to be enabled" />
+            <ui:SliderInt picking-mode="Ignore" label="Max Tiles Per Renderer" high-value="9362" tooltip="Smaller = fewer vertices per mesh, larger = fewer GameObjects" show-input-field="true" binding-path="meshParameters.tilesPerRenderer" low-value="1" name="tilesPerRenderer" />
         </ui:Foldout>
         <ui:Foldout text="Texture Rendering Options" name="textureParameters">
+            <uie:PropertyField label="Materials" binding-path="textureParameters.materials" name="materials" />
             <uie:EnumField label="Color Scheme" name="colorScheme" />
             <ui:Slider picking-mode="Ignore" label="Time of Year" high-value="1" low-value="0" binding-path="textureParameters.timeOfYear" show-input-field="true" name="timeOfYear" />
         </ui:Foldout>
