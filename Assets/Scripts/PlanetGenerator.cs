@@ -13,7 +13,6 @@ using Random = UnityEngine.Random;
 namespace Earthgen.unity
 {
     [ExecuteInEditMode]
-    [RequireComponent(typeof(GeneratedPlanetData), typeof(RenderedPlanetData))]
     public class PlanetGenerator : MonoBehaviour
     {
         public Terrain_parameters terrainParameters = Terrain_parameters.Default;
@@ -61,7 +60,10 @@ namespace Earthgen.unity
 
         void Awake()
         {
+            if (!Data) gameObject.AddComponent<GeneratedPlanetData>();
+            if (!Render) gameObject.AddComponent<RenderedPlanetData>();
             SaveGeneratedData = SaveGeneratedData;
+            SaveRenderedObjects = SaveRenderedObjects;
         }
         // Start is called before the first frame update
         void Start()
@@ -194,7 +196,7 @@ namespace Earthgen.unity
             Debug.Log($"Generating Textures");
             Render.RenderTextures(textureParameters, gameObject.name);
             if (textureParameters.materials.Length > 0) {
-                textureParameters.materials[0].mainTexture = null; //Render.tileTexture;
+                textureParameters.materials[0].mainTexture = Render.tileTexture;
             }
             textureDirty = false;
         }

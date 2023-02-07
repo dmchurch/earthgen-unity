@@ -6,10 +6,12 @@ using static Earthgen.Statics;
 namespace Earthgen.planet.climate
 {
 	[Serializable]
-	public class Climate
+	public struct Climate
 	{
 		public Climate_variables var;
-		public List<Season> seasons = new();
+		[UnityEngine.SerializeField]
+		private List<Season> _seasons;
+		public List<Season> seasons => _seasons ??= new();
 
 		public void clear_climate () {
 			var.season_count = 0;

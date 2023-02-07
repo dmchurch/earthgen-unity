@@ -7,7 +7,7 @@ using static Earthgen.Statics;
 namespace Earthgen.planet.terrain
 {
 	[Serializable]
-	public class Terrain
+	public struct Terrain
 	{
 		public Terrain_variables var;
 		public Terrain_tile[] tiles;
@@ -129,7 +129,7 @@ namespace Earthgen
 		public static Vector3 default_axis() => Terrain.default_axis();
 
 		public static Terrain terrain(Planet p) => p.terrain;
-		public static Terrain m_terrain(Planet p) => p.terrain;
+		public static ref Terrain m_terrain(Planet p) => ref p.terrain;
 
 		public static Terrain_tile[] tiles (Terrain t) => t.tiles;
 		public static Terrain_corner[] corners (Terrain t) => t.corners;

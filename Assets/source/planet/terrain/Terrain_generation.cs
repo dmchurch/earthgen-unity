@@ -22,6 +22,7 @@ namespace Earthgen.planet.terrain
 		}
 
 		static void _set_variables (Planet p, Terrain_parameters par) {
+			m_terrain(p).var.grid_size = par.grid_size;
 			m_terrain(p).var.axis = par.axis;
 			m_terrain(p).var.radius = 40000000;
 		}
@@ -60,6 +61,7 @@ namespace Earthgen.planet.terrain
 				m_corner(m_terrain(p), id(c)).elevation -= lowest;
 				m_corner(m_terrain(p), id(c)).elevation *= scale / highest;
 			}
+			Debug.Log($"Elevation scaled with lowest={lowest} and highest={lowest+highest}, scale={3000}");
 		}
 
 		static Tile lowest_tile (Planet p) {

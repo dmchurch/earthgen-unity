@@ -7,6 +7,7 @@ namespace Earthgen.planet.terrain
     [Serializable]
     public struct Terrain_variables
     {
+        public int grid_size;
         public Vector3 axis;
 		public float axialTiltInDegrees;
 		public AngleFloat axial_tilt

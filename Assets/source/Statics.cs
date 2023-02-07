@@ -37,7 +37,7 @@ namespace Earthgen
 		public static AngleFloat angle(Vector3 from, Vector3 to) => AngleFloat.FromDegrees(UnityEngine.Vector3.Angle(from, to));
 		public static float dot_product(Vector3 lhs, Vector3 rhs) => UnityEngine.Vector3.Dot(lhs, rhs);
 		public static float distance(Vector3 from, Vector3 to) => (to - from).magnitude;
-		public static float squared_distance(Vector3 from, Vector3 to) => (to - from).magnitude;
+		public static float squared_distance(Vector3 from, Vector3 to) => (to - from).sqrMagnitude;
 
 		public static Vector2 Vector2(float x, float y) => new(x, y);
 		public static Vector2 Vector2(double x, double y) => new((float)x, (float)y);

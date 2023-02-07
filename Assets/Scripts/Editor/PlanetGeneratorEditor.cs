@@ -21,6 +21,7 @@ namespace Earthgen.unity
         private Button GenerateClimate;
         private Button GenerateMeshes;
         private Button GenerateTextures;
+        private Button InstantiateRenderers;
         private TextField seedField;
         private Slider elevationScale;
         private SliderInt tilesPerRenderer;
@@ -58,10 +59,12 @@ namespace Earthgen.unity
             GenerateClimate = myInspector.Q<Button>("Generate_Climate");
             GenerateMeshes = myInspector.Q<Button>("Generate_Meshes");
             GenerateTextures = myInspector.Q<Button>("Generate_Textures");
+            InstantiateRenderers = myInspector.Q<Button>("Instantiate_Renderers");
             GenerateTerrain.RegisterCallback<ClickEvent>((_) => { try { generator.GenerateTerrain(); } finally { CheckRegenerate(); } });
             GenerateClimate.RegisterCallback<ClickEvent>((_) => { try { generator.GenerateClimate(); } finally { CheckRegenerate(); } });
             GenerateMeshes.RegisterCallback<ClickEvent>((_) => { try { generator.GenerateMeshes(); } finally { CheckRegenerate(); } });
             GenerateTextures.RegisterCallback<ClickEvent>((_) => { try { generator.GenerateTextures(); } finally { CheckRegenerate(); } });
+            InstantiateRenderers.RegisterCallback<ClickEvent>((_) => { try { generator.InstantiateRenderers(); } finally { CheckRegenerate(); } });
 
             seedField = myInspector.Q<TextField>("seed");
 

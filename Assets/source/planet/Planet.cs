@@ -9,7 +9,7 @@ using static Earthgen.Statics;
 namespace Earthgen.planet
 {
 	[Serializable]
-	public class Planet
+	public class Planet : UnityEngine.ISerializationCallbackReceiver
 	{
 		public Grid grid;
 		public Terrain terrain;
@@ -18,8 +18,6 @@ namespace Earthgen.planet
 		public Planet()
 		{
 			grid = size_n_grid(0);
-			terrain = new Terrain();
-			climate = new Climate();
 		}
 
 		public void clear() {
@@ -28,6 +26,13 @@ namespace Earthgen.planet
 			clear_terrain(p);
 			clear_climate(p);
 		}
+
+		public void OnAfterDeserialize()
+		{
+			grid = size_n_grid(terrain.var.grid_size);
+		}
+
+		public void OnBeforeSerialize() { }
 	}
 }
 

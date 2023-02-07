@@ -36,6 +36,7 @@
     </ui:Foldout>
     <ui:Button text="Generate Meshes" name="Generate_Meshes" display-tooltip-when-elided="true" />
     <ui:Button text="Generate Textures" display-tooltip-when-elided="true" name="Generate_Textures" />
+    <ui:Button text="Instantiate Renderers" name="Instantiate_Renderers" display-tooltip-when-elided="true" />
     <ui:Toggle label="Save Rendered Objects?" binding-path="saveRenderedObjects" name="saveRenderedObjects" />
     <ui:HelpBox name="saveObjectsWarning" message-type="Warning" text="All meshes and textures will be saved in full to the asset tree! This will greatly increase the size of your Scene file or asset and is probably unnecessary." style="display: none;" />
     <ui:GroupBox />
