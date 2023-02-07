@@ -86,7 +86,7 @@ namespace Earthgen.unity
             tilesPerRenderer.RegisterCallback<ChangeEvent<int>>((evt) => CheckRegenerate(generator.meshDirty = true));
 
             myInspector.Q("materials").RegisterCallback<SerializedPropertyChangeEvent>((_) => CheckRegenerate(generator.textureDirty = true));
-            myInspector.Q("colorScheme").RegisterCallback<ChangeEvent<Enum>>((_) => CheckRegenerate(generator.textureDirty = true));
+            myInspector.Q("colourScheme").RegisterCallback<ChangeEvent<Enum>>((_) => CheckRegenerate(generator.textureDirty = true));
             myInspector.Q("timeOfYear").RegisterCallback<ChangeEvent<float>>((_) => CheckRegenerate(generator.textureDirty |= true));
 
             myInspector.Q<Foldout>("Generation_Settings").value = generator.terrainDirty || generator.climateDirty;

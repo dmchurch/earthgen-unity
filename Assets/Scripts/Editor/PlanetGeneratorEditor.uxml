@@ -29,7 +29,7 @@
         </ui:Foldout>
         <ui:Foldout text="Texture Rendering Options" name="textureParameters">
             <uie:PropertyField label="Materials" binding-path="textureParameters.materials" name="materials" />
-            <uie:EnumField label="Color Scheme" name="colorScheme" />
+            <uie:EnumField label="Colour Scheme" name="colourScheme" binding-path="textureParameters.colourScheme" />
             <ui:Slider picking-mode="Ignore" label="Time of Year" high-value="1" low-value="0" binding-path="textureParameters.timeOfYear" show-input-field="true" name="timeOfYear" />
         </ui:Foldout>
         <ui:Toggle tooltip="When checked, render data will automatically be updated whenever parameters or options change" name="AutoRender" label="Automatically render planet?" binding-path="autoRender" />

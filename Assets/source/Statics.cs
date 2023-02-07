@@ -12,7 +12,9 @@ namespace Earthgen
 		public static readonly AngleFloat pi = AngleFloat.FromRadians(Mathf.PI);
 
 		public static float min(float a, float b) => Math.Min(a, b);
+		public static float min(double a, double b) => Math.Min((float)a, (float)b);
 		public static float max(float a, float b) => Math.Max(a, b);
+		public static float max(double a, double b) => Math.Max((float)a, (float)b);
 		public static float abs(float f) => Math.Abs(f);
 		public static int pow(int x, int y) => (int)Math.Pow(x, y);
 		public static float pow(float x, float y) => Mathf.Pow(x, y);
@@ -44,6 +46,9 @@ namespace Earthgen
 		public static float length(Vector2 v) => v.magnitude;
 		public static AngleFloat angle(Vector2 v) => atan2(v.y, v.x);
 		public static Quaternion rotation_matrix(AngleFloat angle) => Quaternion(Vector3(0,0,1), angle);
+
+		public static Color Colour(double r, double g, double b) => new((float)r, (float)g, (float)b);
+		public static Color interpolate(Color a, Color b, double d) => Color.Lerp(a, b, (float)d);
 
 		public static (T first, U second) make_pair<T, U>(T first, U second) => (first, second);
 		public static void insert<T>(this ISet<T> set, T value) => set.Add(value);

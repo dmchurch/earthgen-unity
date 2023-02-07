@@ -162,6 +162,8 @@ namespace Earthgen.unity
                 if (meshes.Length > i) {
                     filter.sharedMesh = meshes[i];
                 }
+                // convert from Earthgen z-up to unity y-up
+                renderer.transform.rotation = Quaternion.FromToRotation(new(0, 0, 1), Vector3.up);
                 renderer.sharedMaterials = materials;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 renderer.gameObject.name = $"{gameObject.name} [Renderer{(rendererCount == 1 ? "" : " "+i)}]";

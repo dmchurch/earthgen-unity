@@ -1,5 +1,8 @@
+using System;
+
 namespace Earthgen.planet.climate
 {
+    [Serializable]
     public struct Climate_variables
     {
         public int season_count;

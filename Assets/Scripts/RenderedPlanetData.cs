@@ -5,6 +5,8 @@ using UnityEngine;
 using Earthgen.planet.grid;
 using Earthgen.planet.terrain;
 using System.Linq;
+using Earthgen.render;
+using Earthgen.planet.climate;
 
 namespace Earthgen.unity
 {
@@ -12,7 +14,7 @@ namespace Earthgen.unity
     {
         public Mesh[] meshes;
         public Texture2D tileTexture;
-        public Color[] tileColors;
+        public Planet_colours tileColors;
 
         public MeshParameters meshParameters;
         public TextureParameters textureParameters;
@@ -158,16 +160,27 @@ namespace Earthgen.unity
             tileTexture.wrapMode = TextureWrapMode.Clamp;
             var planet = Data.planet;
             int tilesPerSide = Mathf.CeilToInt(Mathf.Sqrt(planet.tile_count()));
-            float pixelsPerTile = 2048 / tilesPerSide;
+            float pixelsPerTile = 2048f / tilesPerSide;
             int ceilPPT = Mathf.CeilToInt(pixelsPerTile);
             var pixels = new Color[ceilPPT * ceilPPT];
             var colorSpan = pixels.AsSpan();
-            Array.Resize(ref tileColors, planet.tile_count());
+
+            tileColors.init_colours(planet);
+            int nseasons = planet.season_count();
+            if (nseasons > 0) {
+                int n = Mathf.FloorToInt(textureParameters.timeOfYear * nseasons * 0.9999f);
+                Season season = planet.nth_season(n);
+                Debug.Log($"Rendering planet in season {n} with scheme {textureParameters.colourScheme}");
+                tileColors.set_colours(planet, season, textureParameters.colourScheme);
+            } else {
+                Debug.Log($"Rendering planet with scheme {textureParameters.colourScheme}");
+                tileColors.set_colours(planet, textureParameters.colourScheme);
+            }
 
             foreach (var tile in planet.tiles()) {
-                Color tileColor = Color.HSVToRGB((tile.id % 12) / 12f, 1 - (float)tile.id / planet.tile_count() / 2f, 1);
-                tileColors[tile.id] = tileColor;
-                colorSpan.Fill(tileColor);
+                //Color tileColor = Color.HSVToRGB((tile.id % 12) / 12f, 1 - (float)tile.id / planet.tile_count() / 2f, 1);
+                //tileColors.tiles[tile.id] = tileColor;
+                colorSpan.Fill(tileColors.tiles[tile.id]);
                 int i = tile.id % tilesPerSide;
                 int j = tile.id / tilesPerSide;
                 int u = Mathf.RoundToInt(i * pixelsPerTile);

@@ -29,7 +29,7 @@ namespace Earthgen
 	}
 
 
-	public readonly struct TemperatureFloat
+	public readonly struct TemperatureFloat : IComparable<TemperatureFloat>
 	{
 		private readonly float temperature;
 		public float Kelvins => temperature;
@@ -41,6 +41,7 @@ namespace Earthgen
 
 		public static TemperatureFloat FromKelvins(float k) => new(k);
 		public static TemperatureFloat FromDegreesC(float c) => new(c + 273.15f);
+		public int CompareTo(TemperatureFloat other) => temperature.CompareTo(other.temperature);
 
 		public static TemperatureFloat operator +(TemperatureFloat a, TemperatureFloat b) => new(a.temperature + b.temperature);
 		public static TemperatureFloat operator -(TemperatureFloat a, TemperatureFloat b) => new(a.temperature - b.temperature);
@@ -50,6 +51,10 @@ namespace Earthgen
 		public static TemperatureFloat operator *(TemperatureFloat a, float b) => new(a.temperature * b);
 		public static TemperatureFloat operator *(double a, TemperatureFloat b) => new((float)a * b.temperature);
 		public static TemperatureFloat operator /(TemperatureFloat a, float b) => new(a.temperature / b);
+		public static bool operator <(TemperatureFloat left, TemperatureFloat right) => left.CompareTo(right) < 0;
+		public static bool operator <=(TemperatureFloat left, TemperatureFloat right) => left.CompareTo(right) <= 0;
+		public static bool operator >(TemperatureFloat left, TemperatureFloat right) => left.CompareTo(right) > 0;
+		public static bool operator >=(TemperatureFloat left, TemperatureFloat right) => left.CompareTo(right) >= 0;
 	}
 
 }
